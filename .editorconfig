@@ -1,20 +1,10 @@
-## src: ./.editorconfig
-##
-## @(#) : editorconfig common template for atsushifx
-##
-## EditorConfig is awesome: https://EditorConfig.org
+# src: .editorconfig
+# @(#) : editorconfig template with shell settings
 #
-# @version  1.0.0
-# @since    2025-05-14
-# @author   atsushifx <https://github.com/atsushifx/>
-# @license  MIT
+# Copyright (c) 2026- atsushifx <https://github.com/atsushifx>
 #
-# @description<<
-#
-# Common editor settings for general programming and documentation files.
-# Applies consistent indentation and line-ending rules.
-#
-#<<
+# This software is released under the MIT License.
+# https://opensource.org/licenses/MIT
 
 root = true
 
@@ -30,9 +20,47 @@ indent_size = 2
 tab_width = 2
 
 # ─────────────────────────────
-# Programming Language
+# Exclude directories/files
+# ─────────────────────────────
+[.tools/*]
+ignore = true
+
+[.local/*]
+ignore = true
+
+[*.spec.sh]
+ignore = true
+
+# ─────────────────────────────
+# Source Code Files
 # ─────────────────────────────
 
+# ─────────────────────────────
+# Shell Scripts
+# ─────────────────────────────
+[*.{sh,bash,zsh}]
+indent_style = space
+indent_size = 2
+tab_width = 2
+
+##  shell script foematter settings
+# --language-dialect
+shell_variant      = bash
+simplify           = true
+binary_next_line   = true
+# --case-indent
+switch_case_indent = true
+space_redirects    = true
+keep_padding       = true
+# --func-next-line
+function_next_line = true
+minify             = true
+
+# PowerShell
+[*.ps1]
+indent_style = space
+indent_size = 4
+tab_width = 4
 
 # ─────────────────────────────
 # Documents
@@ -43,53 +71,33 @@ indent_size = 2
 tab_width = 2
 
 # ─────────────────────────────
-# JSON
+# configuration files
 # ─────────────────────────────
 [*.json]
 indent_style = space
 indent_size = 2
 tab_width = 2
 
-# ─────────────────────────────
-# YAML
-# ─────────────────────────────
 [*.{yaml,yml}]
 indent_style = space
 indent_size = 2
 tab_width = 2
 
-# ─────────────────────────────
-# INI / TOML
-# ─────────────────────────────
 [*.ini]
-indent_style = tab
+indent_style = space
+indent_size = 4
 tab_width = 4
 
 [*.toml]
-indent_style = tab
-tab_width = 4
+indent_style = space
+indent_size = 2
+tab_width = 2
 
-# ─────────────────────────────
-# rc Files
-# ─────────────────────────────
 [*rc]
 indent_style = space
 indent_size = 2
 tab_width = 2
 
-# ─────────────────────────────
-# Shell Scripts
-# ─────────────────────────────
-[*.{sh,bash,zsh}]
-indent_style = space
-indent_size = 2
-tab_width = 2
-
-# PowerShell
-[*.ps1]
-indent_style = space
-indent_size = 4
-tab_width = 4
 
 # ─────────────────────────────
 # Git Config Files
@@ -98,13 +106,20 @@ tab_width = 4
 indent_style = tab
 tab_width = 4
 
-[**/git/*]
-indent_style = tab
-tab_width = 4
-
 # ─────────────────────────────
 # Special Files (e.g. Dockerfile, LICENSE)
 # ─────────────────────────────
+[{Makefile,*.mk}]
+indent_style = tab
+indent_size = 4
+tab_width = 4
+
+# ignore files
+[**/*ignore]
+indent_style = space
+indent_size = 2
+tab_width = 2
+
 # [Dockerfile]
 # indent_style = space
 # indent_size = 2

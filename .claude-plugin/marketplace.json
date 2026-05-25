@@ -3,11 +3,15 @@
   "owner": {
     "name": "atsushifx"
   },
+  "metadata": {
+    "description": "Issue Drive Development toolchain",
+    "version": "0.6.0"
+  },
   "plugins": [
     {
-      "name": "idd",
+      "name": "idd-framework",
       "source": "./plugins/idd-framework",
-      "description": "Issue Driven Development & Spec Driven Development framework for AI-assisted development with Claude Code"
+      "description": "Issue Driven Development for AI-assisted development with Claude Code"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "idd",
-  "description": "IDD (Issue-Driven Development) and SDD (Spec-Driven Development) framework with custom slash commands and agents for systematic AI-assisted development workflows",
+  "description": "IDD (Issue-Driven Development) framework with custom slash commands and agents for systematic AI-assisted development workflows",
   "version": "0.6.0",
   "author": {
     "name": "atsushifx",

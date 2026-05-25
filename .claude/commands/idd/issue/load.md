@@ -317,6 +317,7 @@ echo ""
 ### エラーケース
 
 **Issue番号未指定**:
+
 ```bash
 /idd:issue:load
 
@@ -328,6 +329,7 @@ echo ""
 ```
 
 **無効なIssue番号**:
+
 ```bash
 /idd:issue:load abc
 
@@ -338,6 +340,7 @@ echo ""
 ```
 
 **存在しないIssue**:
+
 ```bash
 /idd:issue:load 99999
 

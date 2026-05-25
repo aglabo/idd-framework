@@ -18,11 +18,12 @@ config:
 
 # ag-logger プロジェクト要素
 title: idd-issue-edit
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-20
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-20: 初版作成 - セッションから選択済みIssueの対話的編集機能を実装
   - 2025-10-20: メインブロック再設計、Claude実装ガイド追加、対話ループをClaude主導に変更
   - 2025-10-20: Claude命令を明示化、Issue本文表示を確実にするため必須アクション追加
@@ -65,8 +66,8 @@ LIBS_DIR="$REPO_ROOT/.claude/commands/_libs"
 . "$LIBS_DIR/idd-session.lib.sh"
 
 # Issue-specific environment setup
-_setup_repo_env
-ISSUES_DIR=$(_get_temp_dir "idd/issues")
+setup_repo_env
+ISSUES_DIR=$(get_temp_dir "idd/issues")
 SESSION_FILE="$ISSUES_DIR/.last.session"
 ```
 
@@ -154,10 +155,10 @@ while (true):
 
 ```bash
 # commit_changes の呼び出し
-Bash(source .claude/commands/_libs/io-utils.lib.sh && source .claude/commands/_libs/idd-env.lib.sh && _setup_repo_env && ISSUES_DIR=$(_get_temp_dir "idd/issues") && commit_changes "{ISSUE_FILE}")
+Bash(source .claude/commands/_libs/io-utils.lib.sh && source .claude/commands/_libs/idd-env.lib.sh && setup_repo_env && ISSUES_DIR=$(get_temp_dir "idd/issues") && commit_changes "{ISSUE_FILE}")
 
 # cleanup_temp_file の呼び出し
-Bash(source .claude/commands/_libs/io-utils.lib.sh && source .claude/commands/_libs/idd-env.lib.sh && _setup_repo_env && ISSUES_DIR=$(_get_temp_dir "idd/issues") && cleanup_temp_file "{ISSUE_FILE}")
+Bash(source .claude/commands/_libs/io-utils.lib.sh && source .claude/commands/_libs/idd-env.lib.sh && setup_repo_env && ISSUES_DIR=$(get_temp_dir "idd/issues") && cleanup_temp_file "{ISSUE_FILE}")
 ```
 
 注意: 環境変数 `ISSUES_DIR` の設定が必要なため、ライブラリを source してから呼び出します。
@@ -167,7 +168,7 @@ Bash(source .claude/commands/_libs/io-utils.lib.sh && source .claude/commands/_l
 ### ヘルパーライブラリ
 
 - `io-utils.lib.sh`: エラー出力 (`error_print`)
-- `idd-env.lib.sh`: リポジトリ環境設定 (`_setup_repo_env`, `_get_temp_dir`)
+- `idd-env.lib.sh`: リポジトリ環境設定 (`setup_repo_env`, `get_temp_dir`)
 - `idd-session.lib.sh`: セッション管理 (`_load_last_file`)
 
 詳細は `.claude/commands/_helpers/README.md` を参照してください。
@@ -339,6 +340,7 @@ commit_changes() {
 
   return 0
 }
+
 ```
 
 ---

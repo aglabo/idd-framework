@@ -65,15 +65,19 @@ Markdown形式の下書きテキストをそのまま返す (JSON形式ではな
 # [Feature] ユーザー認証機能を追加したい
 
 ### 💡 What's the problem you're solving?
+
 メール+パスワードでのログイン手段が存在しないため、ユーザーが認証できない。
 
 ### ✨ Proposed solution
+
 メール+パスワード認証フォームと認証APIエンドポイントを実装する。
 
 ### 🔀 Alternatives considered
+
 OAuthやSSO等も検討したが、まずシンプルなパスワード認証を優先する。
 
 ### 📎 Additional context
+
 特になし
 ```
 
@@ -100,7 +104,7 @@ OAuthやSSO等も検討したが、まずシンプルなパスワード認証を
 中間表現とテンプレートフィールドからMarkdown下書きを生成する。
 
 - `# [Type] タイトル` を先頭行に配置する (Type は issue_type の先頭大文字)
-- テンプレートの label をそのまま `### ` 見出しとして使用する (絵文字・記号含む、文言変更禁止)
+- テンプレートの label をそのまま `###` 見出しとして使用する (絵文字・記号含む、文言変更禁止)
 - 中間表現の content_hint を参照して各フィールドの内容を生成する
 - 内容がない場合は「特になし」「検討していません」と記載する (空セクション禁止)
 - テンプレートに存在しないフィールドを追加しない
@@ -111,10 +115,10 @@ OAuthやSSO等も検討したが、まずシンプルなパスワード認証を
 
 **レビュー観点**:
 
-- 全テンプレートフィールドの label が `### ` 見出しとして出力に含まれているか
+- 全テンプレートフィールドの label が `###` 見出しとして出力に含まれているか
 - label の文言が変更されていないか (絵文字・記号含む完全一致)
 - summary の内容が適切に反映されているか (無関係な内容で埋まっていないか)
-- 空のセクションが存在しないか (`### ` の直後が空または次の `### ` になっていないか)
+- 空のセクションが存在しないか (`###` の直後が空または次の `###` になっていないか)
 - 先頭行が `# [Type] タイトル` 形式になっているか
 
 **フィードバックループの制御**:
@@ -203,15 +207,19 @@ OAuthやSSO等も検討したが、まずシンプルなパスワード認証を
 # [Feature] ログ出力機能を追加
 
 ### 💡 What's the problem you're solving?
+
 デバッグ時にコンソールログを確認する手段がなく、問題の原因特定が困難。
 
 ### ✨ Proposed solution
+
 ログ出力関数を実装し、ログレベル(DEBUG/INFO/WARN/ERROR)と出力フォーマットを設定可能にする。
 
 ### 🔀 Alternatives considered
+
 外部ロギングライブラリの導入も検討したが、依存追加を避けるため標準出力ベースで実装する。
 
 ### 📎 Additional context
+
 特になし
 ```
 
@@ -233,20 +241,25 @@ OAuthやSSO等も検討したが、まずシンプルなパスワード認証を
 # [Bug] ログイン画面でエラーが発生する
 
 ### 🐛 What's the bug?
+
 特殊文字を含むパスワードを入力するとログインに失敗し、エラーメッセージが表示される。
 
 ### 📋 Steps to reproduce
+
 1. ログイン画面を開く
 2. 特殊文字を含むパスワードを入力する
 3. ログインボタンをクリックする
 
 ### ✅ Expected behavior
+
 正常にログインできる。
 
 ### ❌ Actual behavior
+
 エラーメッセージが表示され、ログインに失敗する。
 
 ### 📎 Additional context
+
 特になし
 ```
 
@@ -671,7 +684,9 @@ async function runGeneration(title, summary, issueType, templateContent, interpr
 build_draft_generation_prompt() { ... }
 extract_template_fields() { ... }
 
-build_draft_generation_prompt "${title}" "${summary}" "${issueType}" "${templateContent}" '${JSON.stringify(interpretation)}' "${reviewFeedback}"
+build_draft_generation_prompt "${title}" "${summary}" "${issueType}" "${templateContent}" '${
+    JSON.stringify(interpretation)
+  }' "${reviewFeedback}"
 `;
   const promptResult = await Bash({ command: promptScript });
   const draft = await call_llm_with_prompt(promptResult.output, model);
@@ -775,7 +790,7 @@ async function generateIssue(inputJson) {
   // Phase 3: Review + フィードバックループ (最大2回)
   while (regenerationCount < MAX_REGENERATIONS) {
     const { needsRegeneration, feedback } = await runReview(draft, fieldsJson, summary, model);
-    if (!needsRegeneration) break;
+    if (!needsRegeneration) { break; }
 
     regenerationCount++;
     draft = await runGeneration(title, summary, issueType, templateContent, interpretation, model, feedback);

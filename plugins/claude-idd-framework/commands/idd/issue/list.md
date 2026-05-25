@@ -2,8 +2,8 @@
 # Claude Code 必須要素
 allowed-tools:
   Bash(
-    ls:*, basename:*, sed:*, jq:*, echo:*, cat:*, stat:*,
-    source:*, xargs:*, head:*, git:*
+  ls:*, basename:*, sed:*, jq:*, echo:*, cat:*, stat:*,
+  source:*, xargs:*, head:*, git:*
   ),
   Read(*),
   mcp__serena-mcp__*,

@@ -14,11 +14,12 @@ config:
 
 # プロジェクト要素
 title: get-summary
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-18
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-18: 初版作成 - summary 生成機能実装
   - 2025-10-18: _edit-summary 統合による対話的編集機能を追加
   - 2025-10-18: トップダウン構造に再構成、関数ライブラリを最後にまとめる

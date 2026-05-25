@@ -22,11 +22,12 @@ subcommands:
 
 # ag-logger プロジェクト要素
 title: idd-pr
-version: 0.5.0
+version: 0.6.0
 created: 2025-09-30
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-02: Bash版に簡略化、pr-generatorエージェント連携
   - 2025-09-30: 初版作成
 ---

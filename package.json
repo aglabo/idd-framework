@@ -1,7 +1,7 @@
 {
   "name": "claude-idd-framework",
   "_comment": "@(#) : IDD/SDD framework for claude code",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "lightweight & pluggable logger for TypeScript",
   "author": "atsushifx <https://github.com/atsushifx>",
   "license": "MIT",

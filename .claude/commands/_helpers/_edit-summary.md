@@ -13,11 +13,12 @@ config:
 
 # プロジェクト要素
 title: edit-summary
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-18
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-18: show_summary() と get_choice() に分離、yes/no/quit 入力対応
   - 2025-10-18: ユーザー指示による summary 修正機能実装
 

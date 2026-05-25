@@ -6,11 +6,12 @@ description: serena-mcp を活用した構造化アプリ開発・問題解決�
 
 # ユーザー管理ヘッダー
 title: serena
-version: 0.5.0
+version: 0.6.0
 created: 2025-09-28
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-09-28: 初版作成
 copyright:
   - Copyright (c) 2025 atsushifx <https://github.com/atsushifx>

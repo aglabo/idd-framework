@@ -16,11 +16,12 @@ config:
 
 # プロジェクト要素
 title: _get-issue-types
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-19
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-20: すべてAI判定に変更、柔軟性を優先（高速パス削除）
   - 2025-10-20: summary をオプション化、タイトルプレフィックスから高速判定機能を追加
   - 2025-10-19: 初版作成、issue-generator.md のロジックを抽出

@@ -75,6 +75,9 @@ generate_slug() {
   local max_length="${2:-50}"
   local translator="${3:-to_english_via_ai}"
 
+  # Remove prefix pattern [xxx] from title
+  text=$(printf '%s' "$text" | sed 's/^\[[^]]*\][[:space:]]*//')
+
   # Check if text contains non-ASCII (Japanese) characters
   if is_non_ascii "$text"; then
     # Translate Japanese to English using specified translator

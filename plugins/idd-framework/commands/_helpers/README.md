@@ -4,11 +4,12 @@ header:
   - "@(#)": IDD Helper Library Documentation Index
 title: IDD Helper Libraries
 description: Quick reference for IDD command helper functions
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-15
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-15: Initial version
 copyright:
   - Copyright (c) 2025 atsushifx <https://github.com/atsushifx>
@@ -29,7 +30,7 @@ This directory contains concise documentation for bash helper functions used by 
 ### Environment Management
 
 - **[_idd-env.md](_idd-env.md)**: Repository root detection, temp directory management
-- Functions: `_setup_repo_env()`, `_get_temp_dir()`, `_ensure_dir()`
+- Functions: `setup_repo_env()`, `get_temp_dir()`, `_ensure_dir()`
 
 ### File Operations
 
@@ -62,8 +63,8 @@ source "$SCRIPT_DIR/_libs/idd-env.lib.sh"
 source "$SCRIPT_DIR/_libs/idd-git-ops.lib.sh"
 
 # Use helper functions
-_setup_repo_env
-ISSUE_DIR=$(_get_temp_dir "idd/issues")
+setup_repo_env
+ISSUE_DIR=$(get_temp_dir "idd/issues")
 _ensure_dir "$ISSUE_DIR"
 
 NEW_URL=$(_gh_issue_create "$TITLE" "$BODY_FILE")

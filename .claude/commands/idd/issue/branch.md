@@ -19,11 +19,12 @@ config:
 
 # ag-logger プロジェクト要素
 title: /idd:issue:branch
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-23
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-27: T19実装完了 (使い方セクション・使用例セクション追加)
   - 2025-10-27: T18実装完了 (フロントマター完成: allowed-toolsの具体化)
   - 2025-10-26: ブランチ既存エラー処理実装 (T10-3: Branch already exists validation)

@@ -14,11 +14,12 @@ config:
 
 # ag-logger プロジェクト要素
 title: /idd:issue:push
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-21
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-21: 初版作成 (/idd-issue pushから分離)
   - 2025-10-22: bashスクリプトをリファクタリング (関数化)
   - 2025-10-22: _load_issue_session()をライブラリに移設

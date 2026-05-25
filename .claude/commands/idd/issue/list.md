@@ -2,8 +2,8 @@
 # Claude Code 必須要素
 allowed-tools:
   Bash(
-    ls:*, basename:*, sed:*, jq:*, echo:*, cat:*, stat:*,
-    source:*, xargs:*, head:*, git:*
+  ls:*, basename:*, sed:*, jq:*, echo:*, cat:*, stat:*,
+  source:*, xargs:*, head:*, git:*
   ),
   Read(*),
   mcp__serena-mcp__*,
@@ -19,11 +19,12 @@ config:
 
 # ag-logger プロジェクト要素
 title: idd-issue-list
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-16
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-16: 初版作成 - Issue一覧表示とセッション準備機能を実装
 copyright:
   - Copyright (c) 2025 atsushifx <https://github.com/atsushifx>

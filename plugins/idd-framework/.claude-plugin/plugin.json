@@ -1,7 +1,7 @@
 {
-  "name": "claude-idd-framework",
+  "name": "idd",
   "description": "IDD (Issue-Driven Development) and SDD (Spec-Driven Development) framework with custom slash commands and agents for systematic AI-assisted development workflows",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": {
     "name": "atsushifx",
     "email": "atsushifx@gmail.com"

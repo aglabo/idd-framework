@@ -19,11 +19,12 @@ config:
 
 # ag-logger プロジェクト要素
 title: idd-issue-list
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-16
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-16: 初版作成 - Issue一覧表示とセッション準備機能を実装
 copyright:
   - Copyright (c) 2025 atsushifx <https://github.com/atsushifx>
@@ -60,8 +61,8 @@ LIBS_DIR="$REPO_ROOT/.claude/commands/_libs"
 . "$LIBS_DIR/idd-session.lib.sh"
 
 # Issue-specific environment setup
-_setup_repo_env
-ISSUES_DIR=$(_get_temp_dir "idd/issues")
+setup_repo_env
+ISSUES_DIR=$(get_temp_dir "idd/issues")
 SESSION_FILE="$ISSUES_DIR/.last.session"
 ```
 
@@ -88,7 +89,7 @@ display_selection_result "$selected"
 ### ヘルパーライブラリ
 
 - `io-utils.lib.sh`: エラー出力 (`error_print`)
-- `idd-env.lib.sh`: リポジトリ環境設定 (`_setup_repo_env`, `_get_temp_dir`)
+- `idd-env.lib.sh`: リポジトリ環境設定 (`setup_repo_env`, `get_temp_dir`)
 - `idd-session.lib.sh`: セッション管理 (`_load_session`)
 
 ### ヘルパーコマンド

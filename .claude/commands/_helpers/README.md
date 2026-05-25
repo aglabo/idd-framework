@@ -4,11 +4,12 @@ header:
   - "@(#)": IDD Helper Library Documentation Index
 title: IDD Helper Libraries
 description: Quick reference for IDD command helper functions
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-15
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-15: Initial version
 copyright:
   - Copyright (c) 2025 atsushifx <https://github.com/atsushifx>
@@ -27,22 +28,27 @@ This directory contains concise documentation for bash helper functions used by 
 ## Available Libraries
 
 ### Environment Management
+
 - **[_idd-env.md](_idd-env.md)**: Repository root detection, temp directory management
 - Functions: `setup_repo_env()`, `get_temp_dir()`, `_ensure_dir()`
 
 ### File Operations
+
 - **[_idd-file-ops.md](_idd-file-ops.md)**: File I/O, validation, editing
 - Functions: `_require_file()`, `_extract_title()`, `_view_file()`, `_edit_file()`, `_get_file_timestamp()`
 
 ### Session Management
+
 - **[_idd-session.md](_idd-session.md)**: Stateful workflow tracking
 - Functions: `_save_last_file()`, `_load_last_file()`, `_save_session()`, `_load_session()`, `_has_session()`
 
 ### Git Operations
+
 - **[_idd-git-ops.md](_idd-git-ops.md)**: GitHub CLI wrappers
 - Functions: `_gh_issue_create()`, `_gh_issue_update()`, `_gh_pr_create()`, `_git_commit_with_message()`, `_extract_issue_number_from_url()`
 
 ### I/O Utilities
+
 - **[_io-utils.md](_io-utils.md)**: Error output utilities
 - Functions: `error_print()`
 

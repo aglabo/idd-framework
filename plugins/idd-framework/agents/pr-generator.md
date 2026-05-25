@@ -105,7 +105,7 @@ Codex への入力（コンパクト版のみ）:
 - `git diff --stat` の出力
 - 変更ファイルパス一覧
 - ブランチ名・Issue 参照
-- PR テンプレートの見出し一覧（`## ` で始まる行のみ）
+- PR テンプレートの見出し一覧（`##` で始まる行のみ）
 
 出力する中間表現 JSON:
 
@@ -115,11 +115,11 @@ Codex への入力（コンパクト版のみ）:
   "primary_scope": "commands",
   "narrative": "このPRの一文要約（なぜこの変更が必要か、変更の背景と目的）",
   "section_assignments": [
-    {"template_heading": "## Overview", "content_hint": "変更の目的・背景・期待される効果の要約"},
-    {"template_heading": "## Changes", "content_hint": "変更ファイルの分類と主なポイント"},
-    {"template_heading": "## Related Issues", "content_hint": "Closes #42 など"},
-    {"template_heading": "## Breaking Changes", "content_hint": "なし または 具体的な破壊的変更"},
-    {"template_heading": "## Checklist", "content_hint": "テスト済み、ドキュメント更新あり など"}
+    { "template_heading": "## Overview", "content_hint": "変更の目的・背景・期待される効果の要約" },
+    { "template_heading": "## Changes", "content_hint": "変更ファイルの分類と主なポイント" },
+    { "template_heading": "## Related Issues", "content_hint": "Closes #42 など" },
+    { "template_heading": "## Breaking Changes", "content_hint": "なし または 具体的な破壊的変更" },
+    { "template_heading": "## Checklist", "content_hint": "テスト済み、ドキュメント更新あり など" }
   ],
   "breaking_changes_detected": false,
   "related_issues": ["#42"],
@@ -160,12 +160,14 @@ Codex への入力（コンパクト版のみ）:
 **各セクションのルール**:
 
 Overview:
+
 - ソース: 中間表現の `narrative` + `section_assignments` の content_hint
 - 変更の「なぜ」(Why) に焦点
 - 長さ: 200 文字程度（複雑な変更は複数段落可）
 - フォールバック: コミット本文がすべて空の場合、最新サブジェクト + ファイル変更から推測
 
 Changes:
+
 - ファイルを中間表現の `file_categories` に基づいて分類
   - テスト: `__tests__/`, `tests/` ディレクトリ内、または `.test.`, `.spec.` を含むファイル
   - ドキュメント: `.md` 拡張子
@@ -176,16 +178,19 @@ Changes:
 - 表示上限: 主要な変更ファイル 10 件まで、超過時は件数を記載
 
 Related Issues:
+
 - 形式: `Closes #123` または `Related to #456`
 - 中間表現の `related_issues` から生成
 - 上限: 最大 3 件（それ以上は省略）
 
 Breaking Changes:
+
 - 判定: コミットメッセージに `BREAKING CHANGE:` または `!` が含まれる場合
 - 中間表現の `breaking_changes_detected` が false の場合はテンプレートのノートをそのまま残す
 - 内容: 破壊的変更の詳細、移行パス、非推奨タイムライン
 
 Checklist:
+
 - テンプレートのチェックリスト項目を読み込む
 - 変更内容を分析し、該当しない項目を自動削除
   - deprecated logic/configs の削除がない場合: 該当チェックリストを除外
@@ -202,11 +207,11 @@ Checklist:
 
 **決定的チェック（Bash/Grep）** — 失敗で即再生成:
 
-- テンプレートの全 `## ` 見出しが出力に存在するか（grep で確認）
-- タイトルが `# [a-z]+(\\([^)]+\\))?: ` の正規表現にマッチするか
+- テンプレートの全 `##` 見出しが出力に存在するか（grep で確認）
+- タイトルが `# [a-z]+(\\([^)]+\\))?:` の正規表現にマッチするか
 - タイトルが 72 文字以内か
-- 空セクションが存在しないか（`## ` の直後が空行または次の `## `）
-- H1 が先頭行か（1行目が `# ` で始まるか）
+- 空セクションが存在しないか（`##` の直後が空行または次の `##`）
+- H1 が先頭行か（1行目が `#` で始まるか）
 
 **AI チェック（Codex）** — 失敗で再生成:
 
@@ -230,8 +235,8 @@ Checklist:
 書き込み前検証（失敗時はエラーを返す）:
 
 - Markdown が空でないこと
-- 先頭行が `# ` で始まること
-- テンプレートの全 `## ` 見出しが出力に含まれること
+- 先頭行が `#` で始まること
+- テンプレートの全 `##` 見出しが出力に含まれること
 - `temp/pr/` ディレクトリが存在すること（なければ `mkdir -p` で作成）
 
 保存:
@@ -302,7 +307,7 @@ PR ドラフトを生成しました。
 
 `.github/PULL_REQUEST_TEMPLATE.md` が存在する場合：
 
-- 見出し構造（`## `）を完全に維持
+- 見出し構造（`##`）を完全に維持
 - チェックリスト項目をそのまま使用（動的フィルタリングあり）
 - H1 タイトルはテンプレートの外側に追加
 
@@ -339,6 +344,7 @@ PR ドラフトを生成しました。
 **生成されるタイトル**: `# feat(auth): add email and password authentication`
 
 **Overview 例**:
+
 ```
 メール+パスワードによるユーザー認証機能を実装。ログインフォーム、認証APIエンドポイント、
 セッション管理を追加することで、未認証ユーザーの保護されたリソースへのアクセスを防ぐ。

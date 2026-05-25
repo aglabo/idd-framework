@@ -288,7 +288,6 @@ Launch these agents via the Task tool for specialized workflows:
 - `issue-generator`: Structured GitHub Issue draft creation
 - `pr-generator`: Pull Request draft generation
 
-
 ### 4. Complete IDD Issue Management Workflow
 
 The IDD Issue management system provides a complete workflow from issue creation to branch implementation:
@@ -345,6 +344,7 @@ The IDD Issue management system provides a complete workflow from issue creation
 - **Branch Intelligence**: Automatic domain detection from title [brackets] or content analysis
 - **Flexible Options**: Override domain, specify base branch, handle edge cases
 - **Production Ready**: Full test coverage (31 examples, 100% passing), comprehensive documentation
+
 ### 5. BDD Development (if applicable to future code)
 
 If implementing code in this repository, follow **atsushifx-style BDD**:
@@ -522,6 +522,7 @@ For developing shell scripts (like `xcp.sh`), use the **SDD (Spec-Driven Develop
 #### Reference Implementations
 
 **xcp.sh** (eXtended CoPy utility)
+
 - **Status**: ✅ **100% COMPLETE - PRODUCTION READY** (T1-T10 all implemented and tested)
 - **Test Coverage**: 148 examples, 148 passing (100% success rate), 0 failures, 6 skipped (Windows)
 - **Implementation**: 662 lines (main script), 1687 lines (tests), 20+ functions
@@ -546,6 +547,7 @@ For developing shell scripts (like `xcp.sh`), use the **SDD (Spec-Driven Develop
 - **Production Ready**: Fully documented with shdoc headers, shellcheck clean, ready for deployment
 
 **merge-json.sh** (JSON merge utility) - 🆕 NEW (2025-10-14)
+
 - **Status**: Recently implemented, following BDD principles
 - **Implementation**: 213 lines
 - **Purpose**: Merge two JSON configuration files with shallow merge strategy
@@ -561,12 +563,14 @@ For developing shell scripts (like `xcp.sh`), use the **SDD (Spec-Driven Develop
 - **Test Coverage**: Unit tests in `merge-json.unit.spec.sh`
 
 **logger.lib.sh** (Structured logging library)
+
 - **Lines**: 201 lines
 - **Purpose**: Structured logging with timestamps, error tracking, and flag control
 - **Features**: Multiple log levels (INFO, VERBOSE, ERROR, DRY-RUN), error counting/retrieval, quiet/verbose modes
 - **Usage**: xcp.sh for comprehensive logging needs
 
 **io-utils.lib.sh** (I/O utilities library) - 🆕 NEW (2025-10-14)
+
 - **Lines**: 61 lines
 - **Purpose**: Lightweight I/O utilities without logging overhead
 - **Function**: `error_print()` - Simple stderr output utility (supports heredoc and arguments)

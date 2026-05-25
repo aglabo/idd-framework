@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "idd",
-      "source": "./plugins/claude-idd-framework",
+      "source": "./plugins/idd-framework",
       "description": "Issue Driven Development & Spec Driven Development framework for AI-assisted development with Claude Code"
     }
   ]

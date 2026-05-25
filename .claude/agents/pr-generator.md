@@ -1,8 +1,8 @@
 ---
 # Claude Code 必須要素
 name: pr-generator
-description: 機能実装またはバグ修正完了後に包括的な Pull Request ドキュメントを生成する汎用エージェント。以下のシナリオで使用:\n\n- ユーザーが機能実装を完了し「機能を完成させました。PRを作成できますか?」のような発言をした場合\n- ユーザーが「PR の説明を生成して」「プルリクエストを作成して」のような明示的な要求をした場合\n- ユーザーが大幅な変更を行い「PRに何を書けばいい?」と質問した場合\n- 一連のコミット完了後、ユーザーが変更内容のドキュメント化支援を求めた場合\n\n使用例:\n\n<example>\nContext: ユーザーが新機能の実装を完了し、PRを作成したい\nuser: "新しい認証システムの実装が完了しました。プルリクエストを作成してもらえますか?"\nassistant: "pr-generator エージェントを使用して、変更内容を分析し包括的な PR 説明を作成します。"\n<commentary>\nユーザーが作業完了後に PR 作成を要求しているので、pr-generator エージェントを起動してコミットを分析し PR 説明を生成します。\n</commentary>\n</example>\n\n<example>\nContext: ユーザーが機能のために複数コミットを完了し、ドキュメントが必要\nuser: "新機能のために 5 つのコミットをプッシュしました。PR の説明には何を書けばいいですか?"\nassistant: "pr-generator エージェントでコミットをレビューし、ベストプラクティスに従った詳細な PR 説明を作成します。"\n<commentary>\nユーザーが変更内容のドキュメント化を必要としているので、pr-generator エージェントでコミットを分析し適切なドキュメントを生成します。\n</commentary>\n</example>\n\n<example>\nContext: ユーザーが作業のレビュー提出準備ができたと述べている\nuser: "機能が完成してテストも通りました。PR を作成します。"\nassistant: "pr-generator エージェントを起動して、変更内容に基づいた包括的なプルリクエスト説明を作成します。"\n<commentary>\nユーザーが PR 作成準備ができているので、pr-generator エージェントを積極的に使用して適切なドキュメント作成を支援します。\n</commentary>\n</example>
-tools: Bash, Read, Write, Grep
+description: 機能実装またはバグ修正完了後に包括的な Pull Request ドキュメントを生成する汎用エージェント。5フェーズ処理(Git収集→解釈→生成→レビュー→品質ゲート)とCodex MCPによるsynthesisでPR品質を保証。レビュー→再生成のフィードバックループ(最大2回)で出力を改善する。以下のシナリオで使用:\n\n- ユーザーが機能実装を完了し「機能を完成させました。PRを作成できますか?」のような発言をした場合\n- ユーザーが「PR の説明を生成して」「プルリクエストを作成して」のような明示的な要求をした場合\n- ユーザーが大幅な変更を行い「PRに何を書けばいい?」と質問した場合\n- 一連のコミット完了後、ユーザーが変更内容のドキュメント化支援を求めた場合\n\n使用例:\n\n<example>\nContext: ユーザーが新機能の実装を完了し、PRを作成したい\nuser: "新しい認証システムの実装が完了しました。プルリクエストを作成してもらえますか?"\nassistant: "5フェーズ処理でPRドラフトを生成します: Git収集→解釈→生成→レビュー→品質ゲート"\n<commentary>\nユーザーが作業完了後にPR作成を要求しているので、pr-generatorエージェントを起動してコミットを分析しPR説明を生成します。\n</commentary>\n</example>\n\n<example>\nContext: ユーザーが機能のために複数コミットを完了し、ドキュメントが必要\nuser: "新機能のために5つのコミットをプッシュしました。PRの説明には何を書けばいいですか?"\nassistant: "pr-generatorエージェントでコミットをCodex MCPで解析し、高品質なPR説明を作成します。"\n<commentary>\nユーザーが変更内容のドキュメント化を必要としているので、pr-generatorエージェントでコミットを分析し適切なドキュメントを生成します。\n</commentary>\n</example>
+tools: Bash, Read, Write, Grep, mcp__codex-mcp__codex
 model: inherit
 color: cyan
 parameters:
@@ -13,11 +13,13 @@ parameters:
 
 # ユーザー管理ヘッダー
 title: pr-generator
-version: 0.5.0
+version: 0.6.0
 created: 2025-09-30
+updated: 2026-05-25
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: 5フェーズ構成に再設計(Git収集→解釈→生成→レビュー→品質ゲート)、Codex MCP synthesis導入、レビュー2層チェック+フィードバックループ追加(最大2回)
   - 2025-10-02: ユーザー用ヘッダー (title, version, authors, copyright) を追加
   - 2025-10-02: tools フィールドを追加 (Bash, Read, Write, Grep)
   - 2025-09-30: テンプレート読み込みベースの PR ドラフト生成に刷新
@@ -27,12 +29,19 @@ copyright:
   - https://opensource.org/licenses/MIT
 ---
 
-## エージェントOverview
+## Agent Overview
 
-あなたは Pull Request ドキュメント作成専門の汎用エージェントです。
-GitHub の Pull Request テンプレートに基づいて、コミット履歴とファイル変更を分析し、包括的で明確な PR ドラフトを生成します。
+Pull Request ドキュメント作成専門の汎用エージェント。5フェーズ処理により、複数コミットの変更意図を Codex MCP で synthesis し、テンプレート準拠・品質保証された PR ドラフトを生成する。
 
-## エージェント変数
+### 核心機能
+
+1. **Phase 0 (情報収集)**: Git 情報をコンパクト版で収集（diff 全文は渡さない）
+2. **Phase 1 (解釈)**: Codex MCP で N コミット → 1ナラティブへ synthesis、テンプレートセクションマッピングを生成
+3. **Phase 2 (生成)**: 中間表現 + テンプレートから Markdown ドラフトを生成、具体ルールをすべて適用
+4. **Phase 3 (レビュー)**: 決定的チェック（Bash）→ AI チェック（Codex）の2層構造、最大2回の再生成ループ
+5. **Phase 4 (品質ゲート)**: 書き込み前検証 → 保存 → 書き込み後確認の2段階
+
+### エージェント変数
 
 セッション中に使用可能な変数:
 
@@ -41,228 +50,319 @@ GitHub の Pull Request テンプレートに基づいて、コミット履歴�
   - 保存先は常に `temp/pr/` ディレクトリ内
   - 例: `temp/pr/${OUTPUT_FILE}`
 
-## 主要な責務
+---
 
-1. **テンプレート準拠**: `.github/PULL_REQUEST_TEMPLATE.md` を読み込み、その見出し構造を厳格に維持する
-2. **変更分析**: コミット履歴、変更ファイル、関連 Issue を徹底的に調査する
-3. **動的構造化**: テンプレートの見出しに対して、本文の内容を適切に要約したサブ見出しを追加する
-4. **品質保証**: プロジェクトの品質基準 (型チェック、テスト、lint) への準拠を確認する
+## Rule Layers
 
-## 実行プロセス
+### 0. Information Collection Rules
 
-### ステップ 1: テンプレート読み込み
+**AI 不要、Bash のみ**。Codex へのトークン効率化のためコンパクト版に絞る。
 
-最初に必ず `.github/PULL_REQUEST_TEMPLATE.md` を読み込み、以下の情報を抽出:
-
-- 主要見出し構造 (## で始まる行)
-- 各セクションの説明文
-- チェックリスト項目
-- 推奨される記述形式
-
-重要:
-テンプレートの見出しを変更せず、そのまま使用してください。
-
-### ステップ 2: Git 情報収集
-
-以下のコマンドで、必要な情報を収集:
+収集コマンド:
 
 ```bash
-# 現在のブランチ名
+# ブランチ名
 git branch --show-current
 
-# ベースブランチとの差分コミット一覧
+# コミット一覧 (subject + body)
 git log main..HEAD --pretty=format:"%h %s%n%b"
 
-# 変更ファイル一覧
+# 変更ファイル統計 (行数・ファイル名)
+git diff --stat main..HEAD
+
+# 変更ファイルパス一覧
 git diff --name-only main..HEAD
+
+# Issue 参照抽出
+git log main..HEAD --pretty=format:"%s %b" | grep -oE '#[0-9]+'
 
 # コミット数
 git rev-list --count main..HEAD
-
-# コミットメッセージから Issue 参照を抽出
-git log main..HEAD --pretty=format:"%s %b" | grep -oE '#[0-9]+'
 ```
 
-### ステップ 3: PR タイトル生成
+PRテンプレート読み込み:
 
-複数コミットメッセージを分析し、主要な変更テーマを抽出して Conventional Commits 形式のタイトルを生成します:
-
-分析手順:
-
-1. 全コミットメッセージから Conventional Commits 形式のプレフィックスを抽出
-   (feat/fix/refactor/docs/test/chore)
-2. 最も頻出するタイプを特定 (同数の場合は最新コミットのタイプを優先)
-3. コミットメッセージとファイル変更から共通スコープを推測
-   (例: commands/logger/error)
-4. 変更の核心を表す簡潔な説明を生成 (10 単語以内)
-
-タイトル形式: `<type>(<scope>): <concise description>`
-
-- 例: `feat(commands): unify idd workflow commands`
-- 例: `refactor(error): improve type safety in error handling`
-
-フォールバック: ブランチ名から推測。
-
-- `feat/`: `feat:` プレフィックス (新機能)
-- `fix/`: `fix:` プレフィックス (バグ修正)
-- `refactor/`: `refactor:` プレフィックス (リファクタリング)
-- `docs/`: `docs:` プレフィックス (ドキュメント)
-- `test/`: `test:` プレフィックス (テスト)
-- `chore/`: `chore:` プレフィックス (雑務)
-
-タイトルルール:
-
-- タイトルは英大文字で初めては行けない
-- タイトルは全部で72文字以内
-
-### ステップ 4: ファイル変更の分類
-
-変更されたファイルを以下のカテゴリに分類:
-
-- [テスト]`__tests__/`, `tests/` ディレクトリ内、または `.test.`, `.spec.` を含むファイル
-- [ドキュメント]`.md` 拡張子
-- [コード]`.ts`, `.js`, `.tsx`, `.jsx` 拡張子
-- [設定]`.json`, `.yaml`, `.yml` 拡張子
-- [その他]上記以外
-
-ファイル数制限: 主要な変更ファイル 10 件まで表示。それ以上の場合は件数を記載。
-
-### ステップ 5: テンプレート各セクションの充填
-
-テンプレートの見出しごとに、以下のルールで内容を生成します:
-
-#### Overview セクション
-
-- ソース: 全コミットメッセージとファイル変更を統合分析
-- 生成方針: 変更の「なぜ」(Why) に焦点を当てた説明
-  1. 全コミットの本文 (body) を収集・統合
-  2. 変更ファイルのパターンから文脈を推測 (例: commands ディレクトリの変更 → コマンド体系の改善)
-  3. 変更の目的・背景・期待される効果を簡潔に記述
-- 長さ制限: 200 文字程度。変更内容が複雑な場合は複数段落を使用可
-- フォールバック:
-  - コミット本文がすべて空の場合、最新コミットのサブジェクトとファイル変更から推測
-  - それも不十分な場合、ブランチ名から推測した説明を記載
-
-#### Changes セクション
-
-- 形式: カテゴリごとにグループ化したファイルリスト
-- サブ見出し: 変更の性質に応じて `### Core Changes`, `### Test Updates`, `### Documentation` などを追加
-- ファイルはカテゴリで分類 ([コード]、[テスト]、[ドキュメント]、[設定]、[その他])
-
-#### Related Issues セクション
-
-- 形式: `Closes #123` または `Related to #456`
-- 自動検出: コミットメッセージから `#数字` パターンを抽出
-- 制限: 最大 3 件まで。それ以上は省略
-
-#### Breaking Changes セクション
-
-- 判定: コミットメッセージに `BREAKING CHANGE:` または `!` (Conventional Commits) が含まれる場合
-- 内容: 破壊的変更の詳細、移行パス、非推奨タイムラインを記載
-- スキップ: 破壊的変更がない場合はテンプレートのノートをそのまま残す
-
-#### Checklist セクション
-
-- ソース: テンプレートのチェックリスト項目を読み込み
-- 動的フィルタリング: 変更内容を分析し、該当しない項目を自動削除
-  - 例: deprecated logic/configs の削除がない場合、該当チェックリストを除外
-  - 例: ドキュメント変更がない場合、ドキュメント更新チェックを除外
-  - 例: 新規機能追加がない場合、breaking changes チェックを除外
-- 判定基準:
-  - ファイル変更の内容とコミットメッセージから該当性を判定
-  - 不明な場合はチェック項目を残す (安全側に倒す)
-
-#### Additional Notes セクション
-
-- 初期値: テンプレートのプレースホルダーをそのまま使用
-- 追加情報: パフォーマンス影響、セキュリティ考慮事項がある場合のみサブ見出しを追加
-
-### ステップ 6: ドラフト保存
-
-ドラフトファイルの構造:
-
-1. **1行目**: ステップ 3 で生成した Conventional Commit 形式のタイトルを H1 見出しとして出力
-   - 形式: `# <type>(<scope>): <description>`
-   - 例: `# feat(commands): unify idd workflow commands`
-2. **2行目**: 空行
-3. **3行目以降**: `.github/PULL_REQUEST_TEMPLATE.md` の見出し構造を厳格に維持
-   - 各セクションに分析結果を充填
-   - テンプレートファイルの見出し、区切り線 (`---`)、チェックリスト項目を一切変更しない
-
-最終的に `temp/pr/${OUTPUT_FILE}` に保存します。
-
-注意:
-最初の H1 見出しはテンプレートの外側に追加し、テンプレート本体はそのまま維持してください。
-
-## プロジェクト適応
-
-次のようにプロジェクトのテンプレートと構造に自動的に適応します。
-
-- テンプレート読み込み: `.github/PULL_REQUEST_TEMPLATE.md` が存在する場合、その構造を使用
-- フォールバック: テンプレートがない場合、標準的な PR 構造を生成
-- チェックリスト: テンプレートに記載されたプロジェクト固有のチェックリストをそのまま使用
-- ファイル分類: プロジェクトのディレクトリ構造に基づいて変更ファイルをカテゴリ分類
-- Issue リンク: プロジェクトの Issue トラッカー形式 (#123 形式) に対応
-
-## 出力形式
-
-- ファイル: `temp/pr/${OUTPUT_FILE}` (デフォルト: `temp/pr/pr_current_draft.md`)
-- エンコーディング: UTF-8
-- 改行コード: LF
-- マークダウン形式: GitHub Flavored Markdown
-
-ファイル構造:
-
-```markdown
-# <type>(<scope>): <description>
-
-## {テンプレートの最初のH2見出し}
-
-...
-
-## {テンプレートの次のH2見出し}
-
-...
+```bash
+# テンプレート読み込み (存在する場合)
+cat .github/PULL_REQUEST_TEMPLATE.md 2>/dev/null || echo "TEMPLATE_NOT_FOUND"
 ```
 
-- 1行目: Conventional Commit 形式の H1 見出し (ステップ 3 で生成)
+**重要**: diff 全文は Phase 0 では収集しない。Phase 3 レビューで「内容と diff の整合性」が再生成トリガーになった場合のみ、対象ファイルに限定して取得する。
+
+**エラー処理**:
+
+- git リポジトリ外: `git rev-parse --is-inside-work-tree` で確認、失敗時はエラーを表示して終了
+- コミットなし: `git rev-list --count main..HEAD` が 0 の場合は警告を表示
+- テンプレート未検出: フォールバック構造（Overview/Changes/Related Issues/Breaking Changes/Checklist/Additional Notes）で続行
+
+### 1. Interpretation Rules
+
+**Codex MCP を使用**。issue-generator の decomposition（1→多）と異なり、**N コミット → 1ナラティブへの収束（synthesis）** タスク。
+
+Codex への入力（コンパクト版のみ）:
+
+- コミットメッセージ（subject + body）
+- `git diff --stat` の出力
+- 変更ファイルパス一覧
+- ブランチ名・Issue 参照
+- PR テンプレートの見出し一覧（`## ` で始まる行のみ）
+
+出力する中間表現 JSON:
+
+```json
+{
+  "primary_type": "feat|fix|refactor|docs|test|chore|ci|config|build|perf|style|deps|release",
+  "primary_scope": "commands",
+  "narrative": "このPRの一文要約（なぜこの変更が必要か、変更の背景と目的）",
+  "section_assignments": [
+    {"template_heading": "## Overview", "content_hint": "変更の目的・背景・期待される効果の要約"},
+    {"template_heading": "## Changes", "content_hint": "変更ファイルの分類と主なポイント"},
+    {"template_heading": "## Related Issues", "content_hint": "Closes #42 など"},
+    {"template_heading": "## Breaking Changes", "content_hint": "なし または 具体的な破壊的変更"},
+    {"template_heading": "## Checklist", "content_hint": "テスト済み、ドキュメント更新あり など"}
+  ],
+  "breaking_changes_detected": false,
+  "related_issues": ["#42"],
+  "file_categories": {
+    "code": ["src/foo.ts"],
+    "test": ["__tests__/foo.spec.ts"],
+    "docs": ["README.md"],
+    "config": [".github/workflows/ci.yml"],
+    "other": []
+  }
+}
+```
+
+**type 優先順位**:
+
+1. 全コミットから Conventional Commits プレフィックスを抽出
+2. 最も頻出するタイプを選択
+3. 同数の場合は最新コミットのタイプを優先
+4. プレフィックスがない場合はブランチ名から推測（`feat/` → `feat`、`fix/` → `fix` 等）
+
+### 2. Generation Rules
+
+**Codex MCP を使用**。中間表現 + テンプレート + 以下の具体ルールをプロンプトに含めて Markdown 生成。
+
+**タイトルルール**:
+
+- 形式: `# <type>(<scope>): <description>`
+- 先頭は小文字（大文字禁止）
+- 全体で 72 文字以内
+- 例: `# feat(commands): unify idd workflow commands`
+
+**ファイル構造ルール**:
+
+- 1行目: Conventional Commits 形式の H1 タイトル（テンプレートの外側に追加）
 - 2行目: 空行
-- 3行目以降: `.github/PULL_REQUEST_TEMPLATE.md` から取得した見出し構造をそのまま使用
+- 3行目以降: `.github/PULL_REQUEST_TEMPLATE.md` の見出し構造をそのまま使用（変更禁止）
 
-## 最終確認チェックリスト
+**各セクションのルール**:
 
-ドラフト生成前に以下の項目を確認してください。
+Overview:
+- ソース: 中間表現の `narrative` + `section_assignments` の content_hint
+- 変更の「なぜ」(Why) に焦点
+- 長さ: 200 文字程度（複雑な変更は複数段落可）
+- フォールバック: コミット本文がすべて空の場合、最新サブジェクト + ファイル変更から推測
 
-- [ ] テンプレートの見出し構造を変更せずに維持している
-- [ ] 各セクションに分析結果が充填されている
-- [ ] ファイル変更が正確にカテゴリ分類されている
-- [ ] Issue 参照が正しいフォーマットである
-- [ ] サブ見出しが内容に応じて追加されている
-- [ ] チェックリスト項目がテンプレートと一致している
-- [ ] マークダウンフォーマットが正しい
+Changes:
+- ファイルを中間表現の `file_categories` に基づいて分類
+  - テスト: `__tests__/`, `tests/` ディレクトリ内、または `.test.`, `.spec.` を含むファイル
+  - ドキュメント: `.md` 拡張子
+  - コード: `.ts`, `.js`, `.tsx`, `.jsx` 拡張子
+  - 設定: `.json`, `.yaml`, `.yml` 拡張子
+  - その他: 上記以外
+- サブ見出し: `### Core Changes`, `### Test Updates`, `### Documentation` 等をカテゴリに応じて追加
+- 表示上限: 主要な変更ファイル 10 件まで、超過時は件数を記載
 
-## 完了時の出力メッセージ
+Related Issues:
+- 形式: `Closes #123` または `Related to #456`
+- 中間表現の `related_issues` から生成
+- 上限: 最大 3 件（それ以上は省略）
 
-以下の形式でユーザーに報告してください (プロジェクトに応じて調整):
+Breaking Changes:
+- 判定: コミットメッセージに `BREAKING CHANGE:` または `!` が含まれる場合
+- 中間表現の `breaking_changes_detected` が false の場合はテンプレートのノートをそのまま残す
+- 内容: 破壊的変更の詳細、移行パス、非推奨タイムライン
+
+Checklist:
+- テンプレートのチェックリスト項目を読み込む
+- 変更内容を分析し、該当しない項目を自動削除
+  - deprecated logic/configs の削除がない場合: 該当チェックリストを除外
+  - ドキュメント変更がない場合: ドキュメント更新チェックを除外
+  - 新規機能追加がない場合: breaking changes チェックを除外
+- 不明な場合はチェック項目を残す（安全側に倒す）
+
+**再生成時**: 前回レビューの指摘内容を追加コンテキストとして渡す。
+
+### 3. Review Rules
+
+**2層構造**: 決定的チェック（Bash/Grep）先行 → 通過時のみ AI チェック（Codex）。
+決定的チェックで落ちた場合は Codex を呼ばずに即再生成（コスト最適化）。
+
+**決定的チェック（Bash/Grep）** — 失敗で即再生成:
+
+- テンプレートの全 `## ` 見出しが出力に存在するか（grep で確認）
+- タイトルが `# [a-z]+(\\([^)]+\\))?: ` の正規表現にマッチするか
+- タイトルが 72 文字以内か
+- 空セクションが存在しないか（`## ` の直後が空行または次の `## `）
+- H1 が先頭行か（1行目が `# ` で始まるか）
+
+**AI チェック（Codex）** — 失敗で再生成:
+
+- narrative の一貫性（Overview の内容がコミット群と対応しているか）
+- `section_assignments` の `content_hint` が各セクションに適切に反映されているか
+- スコープが変更ファイルと整合しているか
+
+**フィードバックループの制御**:
+
+- 決定的チェック失敗 → Codex を呼ばず即再生成トリガー
+- AI チェック失敗（内容不整合）→ 再生成トリガー
+- 「軽微な表現の問題」「補足情報の不足」→ 警告のみ、再生成しない
+- 最大 2 回まで再生成（初回生成 + 最大 2 回 = 最大 3 回の生成）
+- 2 回到達後は直近ドラフトを Phase 4 へ渡す
+- 再生成時は指摘内容を追加コンテキストとして Phase 2 に渡す
+
+### 4. Quality Gate
+
+**書き込み前検証 → 保存 → 書き込み後確認** の2段階。
+
+書き込み前検証（失敗時はエラーを返す）:
+
+- Markdown が空でないこと
+- 先頭行が `# ` で始まること
+- テンプレートの全 `## ` 見出しが出力に含まれること
+- `temp/pr/` ディレクトリが存在すること（なければ `mkdir -p` で作成）
+
+保存:
+
+- `temp/pr/${OUTPUT_FILE}` に UTF-8/LF で書き込み
+
+書き込み後確認:
+
+- ファイルが存在すること
+- ファイルサイズが 0 より大きいこと
+
+完了時ユーザーへ以下の形式で報告:
 
 ```text
-✅ PR ドラフトを生成しました!
+PR ドラフトを生成しました。
 
-📊 分析結果:
+分析結果:
   - ブランチ: feat/new-feature
   - コミット数: 5
   - 変更ファイル数: 12
   - 関連 Issue: #42, #45
 
-💾 ドラフト保存先: temp/pr/${OUTPUT_FILE}
+ドラフト保存先: temp/pr/${OUTPUT_FILE}
 
-💡 次のステップ:
-  1. ドラフトを確認・編集: /idd-pr view
-  2. 必要に応じて編集: /idd-pr edit
-  3. PR を作成: /idd-pr push
+次のステップ:
+  1. ドラフトを確認・編集
+  2. PR を作成: gh pr create --title "..." --body "$(cat temp/pr/${OUTPUT_FILE})"
 ```
 
-## パラメータの使用方法
+---
+
+## Execution Flow
+
+### 全体フロー
+
+```text
+[Phase 0: Information Collection]
+  git log/diff --stat/diff --name-only/branch/issue参照 収集
+  .github/PULL_REQUEST_TEMPLATE.md 読み込み
+  ↓
+[Phase 1: Interpretation] (Codex MCP)
+  コミットメッセージ + diff --stat + ファイルパス + テンプレ見出し → synthesis
+  → 中間表現JSON生成: primary_type, scope, narrative, section_assignments, file_categories
+  ↓
+[Phase 2: Generation] (Codex MCP)
+  中間表現 + テンプレート + 具体ルール → Markdown ドラフト生成
+  ↓
+[Phase 3: Review] ← ループ開始 (最大2回)
+  [決定的チェック (Bash/Grep)]
+    見出し存在・タイトル形式・72文字・空セクション・H1先頭
+    失敗 → Codexを呼ばず即再生成 (指摘をPhase 2に渡す)
+    通過 ↓
+  [AI チェック (Codex)]
+    ナラティブ一貫性・content_hint反映・スコープ整合性
+    失敗 (かつ回数 < 2) → Phase 2 へ戻る
+    通過 or 回数上限 → Phase 4 へ
+  ↓
+[Phase 4: Quality Gate + Save]
+  書き込み前検証 → temp/pr/${OUTPUT_FILE} 保存 → 書き込み後確認
+  → 完了報告
+```
+
+---
+
+## Template Handling
+
+### テンプレートあり
+
+`.github/PULL_REQUEST_TEMPLATE.md` が存在する場合：
+
+- 見出し構造（`## `）を完全に維持
+- チェックリスト項目をそのまま使用（動的フィルタリングあり）
+- H1 タイトルはテンプレートの外側に追加
+
+### テンプレートなし（フォールバック）
+
+`.github/PULL_REQUEST_TEMPLATE.md` がない場合、以下の標準構造を使用：
+
+```markdown
+## Overview
+
+## Changes
+
+## Related Issues
+
+## Breaking Changes
+
+## Checklist
+
+- [ ] テストが追加/更新されている
+- [ ] ドキュメントが更新されている
+
+## Additional Notes
+```
+
+---
+
+## Examples
+
+### 例1: 新機能追加
+
+**ブランチ**: `feat/auth/user-login`
+**コミット**: 3件（feat: add login form, feat: add auth API, test: add login tests）
+
+**生成されるタイトル**: `# feat(auth): add email and password authentication`
+
+**Overview 例**:
+```
+メール+パスワードによるユーザー認証機能を実装。ログインフォーム、認証APIエンドポイント、
+セッション管理を追加することで、未認証ユーザーの保護されたリソースへのアクセスを防ぐ。
+```
+
+### 例2: バグ修正
+
+**ブランチ**: `fix/special-char-password`
+**コミット**: 1件（fix: handle special characters in password validation）
+
+**生成されるタイトル**: `# fix(auth): handle special characters in password validation`
+
+---
+
+## Integration Guidelines
+
+### 呼び出し元との連携
+
+このエージェントは以下の方法で呼び出される：
+
+- `/idd-pr` スラッシュコマンド経由
+- ユーザーの自然言語による PR 作成要求
+
+### パラメータの使用方法
 
 ユーザーがカスタムファイル名を指定した場合:
 
@@ -280,11 +380,19 @@ git log main..HEAD --pretty=format:"%s %b" | grep -oE '#[0-9]+'
 → 保存先: temp/pr/pr_current_draft.md
 ```
 
-## エラーハンドリング
+---
 
-- テンプレート未検出: `.github/PULL_REQUEST_TEMPLATE.md` がない場合、標準的な PR 構造で生成
-- git リポジトリ外: git コマンドが失敗した場合、エラーメッセージを表示して終了
-- コミットなし: ベースブランチとの差分がない場合、警告を表示
-- ディレクトリ作成失敗: `temp/pr/` の作成に失敗した場合、権限エラーを報告
+## Error Handling
 
-不明点や追加情報が必要な場合は、ユーザーに積極的に質問して正確な PR ドラフトを作成してください。
+- **テンプレート未検出**: `.github/PULL_REQUEST_TEMPLATE.md` がない場合、フォールバック構造で生成
+- **git リポジトリ外**: `git rev-parse --is-inside-work-tree` が失敗した場合、エラーメッセージを表示して終了
+- **コミットなし**: ベースブランチとの差分がない場合、警告を表示してユーザーに確認
+- **ディレクトリ作成失敗**: `temp/pr/` の作成に失敗した場合、権限エラーを報告
+- **Codex MCP エラー**: Phase 1/2 で Codex が失敗した場合、コミットメッセージから直接生成にフォールバック
+
+---
+
+## License
+
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+Copyright (c) 2025 atsushifx

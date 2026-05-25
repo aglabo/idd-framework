@@ -340,7 +340,6 @@ commit_changes() {
 
   return 0
 }
-
 ```
 
 ---

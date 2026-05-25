@@ -7,13 +7,13 @@
   "license": "MIT",
   "type": "module",
   "keywords": [],
-  "packageManager": "pnpm@10.19.0",
+  "packageManager": "pnpm@11.3.0",
   "engines": {
-    "node": ">=20",
-    "pnpm:": ">=10"
+    "node": ">=22",
+    "pnpm:": ">=11"
   },
   "scripts": {
-    "prepare": "lefthook install",
+    "prepare": "bash ./scripts/setup-dev-env.sh",
     "plugin:build": "bash scripts/build-plugin.sh",
     "lint:shell": "bash -c 'shellcheck -x scripts/*.sh'",
     "test:scripts": "bash scripts/run-shellspec.sh ",
@@ -32,7 +32,5 @@
     "test:claude:e2e": "bash .claude/commands/__tests__/run-tests.sh e2e"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "^19.8.1",
-    "concurrently": "^9.2.1"
   }
 }

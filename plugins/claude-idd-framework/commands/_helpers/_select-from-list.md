@@ -2,7 +2,7 @@
 # Claude Code 必須要素
 allowed-tools:
   Bash(
-    jq:*, echo:*, cat:*
+  jq:*, echo:*, cat:*
   ),
   Read(*)
 argument-hint: select_list(json)

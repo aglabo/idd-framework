@@ -1,15 +1,26 @@
-// src: shared/configs/commitlint.config.base.ts
-// @(#) : commitlint base configuration
+// src: configs/commitlint.config.js
+// @(#) : commitlint basic configuration
 //
-// Copyright (c) 2025 atsushifx <https://github.com/atsushifx>
+// Copyright (c) 2026- atsushifx <http://github.com/atsushifx>
 //
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-// type check for typescript
 // commit lint common configs
 const defaultConfig = {
   extends: ['@commitlint/config-conventional'],
+  parserPreset: {
+    parserOpts: {
+      headerPattern: /^(?:(merge)[\s]+\(#(\d+)\): )?(\w*)(?:\(([^)]*)\))?!?: (.+)$/,
+      headerCorrespondence: [
+        'merge',
+        'pr',
+        'type',
+        'scope',
+        'subject',
+      ],
+    },
+  },
   rules: {
     'type-enum': [2, 'always', [
       // === Default conventional types ===
@@ -31,9 +42,8 @@ const defaultConfig = {
       'deps', // (custom) Updating third-party dependencies (npm/yarn/etc.)
     ]],
     'subject-case': [2, 'never', ['start-case', 'pascal-case']], // etc
-    'header-max-length': [2, 'always', 72],
+    'header-max-length': [2, 'always', 76],
   },
 };
 
-// export
 export default defaultConfig;

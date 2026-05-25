@@ -1,11 +1,11 @@
 {
-  "name": "claude-idd-framework-marketplace",
+  "name": "idd-framework-marketplace",
   "owner": {
     "name": "atsushifx"
   },
   "plugins": [
     {
-      "name": "claude-idd-framework",
+      "name": "idd",
       "source": "./plugins/claude-idd-framework",
       "description": "Issue Driven Development & Spec Driven Development framework for AI-assisted development with Claude Code"
     }

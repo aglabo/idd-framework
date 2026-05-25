@@ -13,7 +13,7 @@
     "pnpm:": ">=11"
   },
   "scripts": {
-    "prepare": "bash ./setup-dev-env.sh",
+    "prepare": "bash ./scripts/setup-dev-env.sh",
     "plugin:build": "bash scripts/build-plugin.sh",
     "lint:shell": "bash -c 'shellcheck -x scripts/*.sh'",
     "test:scripts": "bash scripts/run-shellspec.sh ",

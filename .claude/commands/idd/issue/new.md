@@ -17,11 +17,12 @@ config:
 
 # ag-logger プロジェクト要素
 title: /idd:issue:new
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-16
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-19: セッション管理機能を追加 (idd-session.lib.sh 使用)
   - 2025-10-19: issue-generator エージェントによる下書き生成機能を追加
   - 2025-10-19: /_helpers/_get-issue-types 統合で種別判定機能を追加

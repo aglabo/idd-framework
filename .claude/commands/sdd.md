@@ -22,11 +22,12 @@ subcommands:
   commit: "対話的ファイル選択とコミット実行"
 # ユーザー管理ヘッダー
 title: sdd
-version: 0.5.0
+version: 0.6.0
 created: 2025-09-28
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-15: MCP統合によるトークン効率最適化、全サブコマンドでMCP必須化
   - 2025-10-02: フロントマターベース構造に再構築、Bash実装に変更
   - 2025-09-28: 初版作成

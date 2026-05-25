@@ -18,11 +18,12 @@ config:
 
 # ag-logger プロジェクト要素
 title: idd-issue-edit
-version: 0.5.0
+version: 0.6.0
 created: 2025-10-20
 authors:
   - atsushifx
 changes:
+  - 2026-05-25: version 0.6.0 — marketplace release unification
   - 2025-10-20: 初版作成 - セッションから選択済みIssueの対話的編集機能を実装
   - 2025-10-20: メインブロック再設計、Claude実装ガイド追加、対話ループをClaude主導に変更
   - 2025-10-20: Claude命令を明示化、Issue本文表示を確実にするため必須アクション追加

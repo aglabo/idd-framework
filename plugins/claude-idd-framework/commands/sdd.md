@@ -794,7 +794,7 @@ echo ""
 
 ### Subcommand: coding
 
-```bash
+````bash
 #!/bin/bash
 # BDD implementation phase using codex MCP for token efficiency
 
@@ -863,7 +863,7 @@ Each task follows this structure:
   - Test file: {test file path}
   - BDD test case: {Given/When/Then description}
   - Expected result: {verification criteria}
-```
+````
 
 ## Current Session
 
@@ -873,50 +873,71 @@ Target task group: {task_group or "Full implementation"}
 ## Tasks
 
 EOF
-  echo "✅ Created temp/todo.md template"
+echo "✅ Created temp/todo.md template"
 else
-  echo "📋 Using existing temp/todo.md"
+echo "📋 Using existing temp/todo.md"
 fi
 
 echo ""
 
 # === MCP分析フェーズ (codex起動前) ===
+
 echo "🔍 Phase 1: MCP Pre-Analysis (before launching codex)"
 echo "=================================================="
 echo ""
 
 # プロジェクト全体の理解
+
 analyze_project_with_mcp "$REPO_ROOT"
 
 # Note: Claude は以下のMCPツールを使用してプロジェクトを理解:
+
 # 1. mcp__lsmcp__get_project_overview --root "$REPO_ROOT"
+
 # 2. mcp__serena-mcp__list_memories
+
 # 3. mcp__serena-mcp__read_memory "project_purpose_and_tech_stack"
+
 # 4. mcp__serena-mcp__read_memory "code_style_and_conventions"
+
 # 5. mcp__serena-mcp__read_memory "mcp_tools_mandatory_usage"
+
 # 6. mcp__serena-mcp__read_memory "task_completion_checklist"
 
 # 既存BDDパターンの調査
-analyze_patterns_with_mcp "__tests__" "describe.*Given.*When.*Then" true
+
+analyze_patterns_with_mcp "**tests**" "describe.*Given.*When.*Then" true
 
 # Note: Claude は以下を使用して既存BDDパターンを理解:
+
 # 7. mcp__serena-mcp__search_for_pattern \
-#      --substring_pattern "describe.*Given.*When.*Then" \
-#      --restrict_search_to_code_files true \
-#      --paths_include_glob "**/__tests__/**"
-# 8. mcp__serena-mcp__list_dir --relative_path "__tests__" --recursive true
+
+# --substring_pattern "describe.*Given.*When.*Then" \
+
+# --restrict_search_to_code_files true \
+
+# --paths_include_glob "**/**tests**/**"
+
+# 8. mcp__serena-mcp__list_dir --relative_path "**tests**" --recursive true
 
 # namespace/moduleに基づく関連コード検索
+
 echo "🔎 Searching related code for $namespace/$module..."
 echo ""
 
 # Note: Claude は以下を使用して関連コードを検索:
+
 # 9. mcp__lsmcp__search_symbols --query "$module" --root "$REPO_ROOT"
+
 # 10. mcp__serena-mcp__find_file \
-#       --file_mask "*$module*" \
-#       --relative_path "."
+
+# --file_mask "*$module*" \
+
+# --relative_path "."
+
 # 11. mcp__serena-mcp__get_symbols_overview \
-#       --relative_path "<検出されたファイル>"
+
+# --relative_path "<検出されたファイル>"
 
 echo "=================================================="
 echo ""
@@ -924,67 +945,123 @@ echo "✅ MCP Pre-Analysis completed"
 echo ""
 
 # === Codex MCP 起動 ===
+
 echo "🚀 Phase 2: Launching Codex MCP for BDD implementation..."
 echo ""
 
 # Note: Claude will invoke codex MCP with MCP-aware base instructions
-# Codex MCP provides:
-# - Isolated subprocess execution (token reduction)
-# - Workspace-write sandbox mode (read project, write code/tests)
-# - Custom base instructions for BDD workflow with MCP integration
-# - Approval policy for shell commands
-#
-# Base instructions must include:
-# 1. **MCP Tools Mandatory Usage** (最優先事項):
-#    - 必須: すべてのコード操作前に lsmcp, serena-mcp を使用
-#    - 必須: 既存パターンの理解と尊重
-#    - 必須: 変更前の影響範囲確認
-#    - 段階的詳細化: overview → symbols → details の順
-#
-# 2. Strict Red-Green-Refactor cycle (RED → GREEN → REFACTOR)
-# 3. 1 message = 1 test principle
-# 4. Read tasks.md and break down to test cases in temp/todo.md
-# 5. Use TodoWrite tool to track progress
-# 6. Keep temp/todo.md and TodoWrite in sync (完全同期が必須)
-# 7. Project-specific quality gates (types/lint/test/format/build)
-# 8. Given/When/Then structure with tags ([正常]/[異常]/[エッジケース])
-#
-# Implementation workflow:
-# STEP 0: MCP-based code understanding (NEW)
-#   - Use mcp__serena-mcp__get_symbols_overview before reading files
-#   - Use mcp__lsmcp__search_symbols to find related code
-#   - Use mcp__serena-mcp__find_symbol to understand existing patterns
-#   - Use mcp__serena-mcp__find_referencing_symbols before changes
-#
-# STEP 1: Initialize temp/todo.md from tasks.md
-#   - Read tasks.md and extract all task items
-#   - Convert each task to markdown checklist format in temp/todo.md
-#   - Create TodoWrite items matching temp/todo.md structure
-#
-# STEP 2: Implement each task following BDD
-#   - Use MCP tools to understand existing code patterns (STEP 0)
-#   - Mark task as in_progress in both temp/todo.md and TodoWrite
-#   - Follow RED-GREEN-REFACTOR cycle
-#   - Update progress after each phase
-#
-# STEP 3: Mark completed tasks
-#   - Update temp/todo.md checkbox: [ ] → [x]
-#   - Update TodoWrite status: completed
-#   - Update tasks.md checkbox: [ ] → [x]
-#   - Use mcp__lsmcp__lsp_get_diagnostics to verify no errors
-#
-# STEP 4: Final synchronization
-#   - Verify all three files are in sync
-#   - Generate summary of completed tasks
-#   - Save session state for resumption
-#
-# Synchronization rules:
-# - temp/todo.md is the working copy (frequently updated)
-# - TodoWrite tool is the runtime tracker (real-time updates)
-# - tasks.md is the source of truth (updated on completion)
-# - All three must show identical completion status
-```
 
+# Codex MCP provides:
+
+# - Isolated subprocess execution (token reduction)
+
+# - Workspace-write sandbox mode (read project, write code/tests)
+
+# - Custom base instructions for BDD workflow with MCP integration
+
+# - Approval policy for shell commands
+
+# 
+
+# Base instructions must include:
+
+# 1. **MCP Tools Mandatory Usage** (最優先事項):
+
+# - 必須: すべてのコード操作前に lsmcp, serena-mcp を使用
+
+# - 必須: 既存パターンの理解と尊重
+
+# - 必須: 変更前の影響範囲確認
+
+# - 段階的詳細化: overview → symbols → details の順
+
+# 
+
+# 2. Strict Red-Green-Refactor cycle (RED → GREEN → REFACTOR)
+
+# 3. 1 message = 1 test principle
+
+# 4. Read tasks.md and break down to test cases in temp/todo.md
+
+# 5. Use TodoWrite tool to track progress
+
+# 6. Keep temp/todo.md and TodoWrite in sync (完全同期が必須)
+
+# 7. Project-specific quality gates (types/lint/test/format/build)
+
+# 8. Given/When/Then structure with tags ([正常]/[異常]/[エッジケース])
+
+# 
+
+# Implementation workflow:
+
+# STEP 0: MCP-based code understanding (NEW)
+
+# - Use mcp__serena-mcp__get_symbols_overview before reading files
+
+# - Use mcp__lsmcp__search_symbols to find related code
+
+# - Use mcp__serena-mcp__find_symbol to understand existing patterns
+
+# - Use mcp__serena-mcp__find_referencing_symbols before changes
+
+# 
+
+# STEP 1: Initialize temp/todo.md from tasks.md
+
+# - Read tasks.md and extract all task items
+
+# - Convert each task to markdown checklist format in temp/todo.md
+
+# - Create TodoWrite items matching temp/todo.md structure
+
+# 
+
+# STEP 2: Implement each task following BDD
+
+# - Use MCP tools to understand existing code patterns (STEP 0)
+
+# - Mark task as in_progress in both temp/todo.md and TodoWrite
+
+# - Follow RED-GREEN-REFACTOR cycle
+
+# - Update progress after each phase
+
+# 
+
+# STEP 3: Mark completed tasks
+
+# - Update temp/todo.md checkbox: [ ] → [x]
+
+# - Update TodoWrite status: completed
+
+# - Update tasks.md checkbox: [ ] → [x]
+
+# - Use mcp__lsmcp__lsp_get_diagnostics to verify no errors
+
+# 
+
+# STEP 4: Final synchronization
+
+# - Verify all three files are in sync
+
+# - Generate summary of completed tasks
+
+# - Save session state for resumption
+
+# 
+
+# Synchronization rules:
+
+# - temp/todo.md is the working copy (frequently updated)
+
+# - TodoWrite tool is the runtime tracker (real-time updates)
+
+# - tasks.md is the source of truth (updated on completion)
+
+# - All three must show identical completion status
+
+````
 ### Subcommand: commit
 
 ```bash
@@ -1166,7 +1243,7 @@ while true; do
       ;;
   esac
 done
-```
+````
 
 ## アーキテクチャの特徴
 
@@ -1194,11 +1271,13 @@ done
 #### req (要件定義)
 
 MCPツール使用目的:
+
 - プロジェクト全体の理解
 - 既存要件ドキュメントパターンの調査
 - ドキュメント品質基準の把握
 
 主要ツール:
+
 - `mcp__lsmcp__get_project_overview`: プロジェクト概要
 - `mcp__serena-mcp__read_memory`: プロジェクト記憶読み込み
 - `mcp__serena-mcp__search_for_pattern`: 要件パターン検索
@@ -1206,11 +1285,13 @@ MCPツール使用目的:
 #### spec (設計仕様)
 
 MCPツール使用目的:
+
 - 既存実装パターンの学習
 - アーキテクチャの理解
 - インターフェース設計の参考
 
 主要ツール:
+
 - `mcp__serena-mcp__get_symbols_overview`: シンボル概要取得
 - `mcp__lsmcp__search_symbols`: 関連シンボル検索
 - `mcp__serena-mcp__find_symbol`: 既存実装パターン取得
@@ -1218,11 +1299,13 @@ MCPツール使用目的:
 #### tasks (タスク分解)
 
 MCPツール使用目的:
+
 - BDD階層構造の理解
 - 既存テストパターンの学習
 - タスク分解の参考
 
 主要ツール:
+
 - `mcp__serena-mcp__search_for_pattern`: BDDパターン検索
 - `mcp__serena-mcp__list_dir`: テスト構造確認
 - `mcp__serena-mcp__find_symbol`: テストシンボル取得
@@ -1230,11 +1313,13 @@ MCPツール使用目的:
 #### coding (BDD実装)
 
 MCPツール使用目的 (最重要):
+
 - コード理解前のパターン学習
 - 既存コードベースの尊重
 - 変更前の影響範囲確認
 
 主要ツール:
+
 - `mcp__lsmcp__get_project_overview`: プロジェクト全体把握
 - `mcp__serena-mcp__read_memory`: 全メモリ読み込み
 - `mcp__lsmcp__search_symbols`: 関連コード検索
@@ -1242,6 +1327,7 @@ MCPツール使用目的 (最重要):
 - `mcp__serena-mcp__get_symbols_overview`: ファイル概要取得
 
 codex-mcp内でのMCP使用:
+
 - `mcp__serena-mcp__get_symbols_overview`: ファイル読み込み前
 - `mcp__lsmcp__search_symbols`: 関連コード特定
 - `mcp__serena-mcp__find_symbol`: 既存パターン理解
@@ -1251,11 +1337,13 @@ codex-mcp内でのMCP使用:
 #### commit (コミット実行)
 
 MCPツール使用目的:
+
 - 変更ファイルの影響範囲確認
 - シンボル変更の検証
 - 診断エラーチェック
 
 主要ツール:
+
 - `mcp__serena-mcp__get_symbols_overview`: 変更シンボル確認
 - `mcp__serena-mcp__find_referencing_symbols`: 参照元確認
 - `mcp__lsmcp__lsp_get_diagnostics`: 診断チェック

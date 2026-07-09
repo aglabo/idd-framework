@@ -44,4 +44,4 @@ rules:
     dictURL: "https://atsushifx.github.io/proof-dictionary/"
   prh:
     rulePaths:
-      - ./.textlint/dict/prh.yml
+      - ./.textlint/dicts/prh.yml

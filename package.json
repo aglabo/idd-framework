@@ -7,9 +7,9 @@
   "license": "MIT",
   "type": "module",
   "keywords": [],
-  "packageManager": "pnpm@11.10.0",
+  "packageManager": "pnpm@11.18.0",
   "engines": {
-    "node": ">=22",
+    "node": ">=24",
     "pnpm:": ">=11"
   },
   "scripts": {

@@ -74,6 +74,62 @@ cleanup_branch_functions() {
 }
 
 # =============================================================================
+# Test Session Fixtures
+# =============================================================================
+
+##
+# @brief Create a .last.session fixture for branch command tests
+# @param $1 Session file path
+# @param $2 Existing branch name (optional)
+##
+create_test_last_session() {
+  local session_file="$1"
+  local branch_name="${2:-}"
+
+  mkdir -p "$(dirname "$session_file")"
+  {
+    echo "# Last session"
+    echo 'LAST_ISSUE_FILE="issue-027-add-feature.md"'
+    echo 'LAST_ISSUE_NUMBER="027"'
+    echo 'LAST_COMMAND="new"'
+    echo 'LAST_ISSUE_TITLE="Add feature"'
+    echo 'LAST_ISSUE_TYPE="feature"'
+    echo 'LAST_COMMIT_TYPE="feat"'
+    echo 'LAST_BRANCH_TYPE="feat"'
+    if [ -n "$branch_name" ]; then
+      echo "LAST_BRANCH_NAME=\"$branch_name\""
+    fi
+    echo 'LAST_MODIFIED="2025-10-26T10:00:00+09:00"'
+  } > "$session_file"
+}
+
+##
+# @brief Create a .branch.session fixture for branch command tests
+# @param $1 Session file path
+# @param $2 Suggested branch
+# @param $3 Domain (optional)
+# @param $4 Base branch (optional)
+# @param $5 Issue number (optional)
+##
+create_test_branch_session() {
+  local session_file="$1"
+  local suggested_branch="$2"
+  local domain="${3:-test}"
+  local base_branch="${4:-main}"
+  local issue_number="${5:-27}"
+
+  mkdir -p "$(dirname "$session_file")"
+  {
+    echo "# Last session"
+    echo "suggested_branch=\"$suggested_branch\""
+    echo "domain=\"$domain\""
+    echo "base_branch=\"$base_branch\""
+    echo "issue_number=\"$issue_number\""
+    echo 'LAST_MODIFIED="2025-10-26T10:00:00+09:00"'
+  } > "$session_file"
+}
+
+# =============================================================================
 # Mock Functions
 # =============================================================================
 

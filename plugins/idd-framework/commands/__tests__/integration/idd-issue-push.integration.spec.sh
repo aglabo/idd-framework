@@ -31,7 +31,8 @@
 
 # Load helper libraries
 PROJECT_ROOT="${PROJECT_ROOT:-$(pwd)}"
-HELPERS_DIR="$PROJECT_ROOT/.claude/commands/__tests__/__helpers"
+COMMANDS_ROOT="${COMMANDS_ROOT:-$PROJECT_ROOT/plugins/idd-framework/commands}"
+HELPERS_DIR="$COMMANDS_ROOT/__tests__/__helpers"
 . "$HELPERS_DIR/gh-mocks.lib.sh"
 . "$HELPERS_DIR/idd-session-mocks.lib.sh"
 . "$HELPERS_DIR/idd-issue-push-functions.lib.sh"

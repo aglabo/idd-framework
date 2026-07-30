@@ -30,7 +30,8 @@
 #
 
 PROJECT_ROOT="${PROJECT_ROOT:-${SHELLSPEC_PROJECT_ROOT:-$(pwd)}}"
-LIBS_DIR="$PROJECT_ROOT/.claude/commands/_libs"
+COMMANDS_ROOT="${COMMANDS_ROOT:-$PROJECT_ROOT/plugins/idd-framework/commands}"
+LIBS_DIR="$COMMANDS_ROOT/_libs"
 
 # Source filename-utils.lib.sh for generate_slug and to_english_via_ai
 . "$LIBS_DIR/filename-utils.lib.sh"

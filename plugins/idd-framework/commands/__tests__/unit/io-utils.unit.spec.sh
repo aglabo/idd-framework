@@ -4,10 +4,11 @@
 # @(#) io-utils.lib.sh unit tests
 
 PROJECT_ROOT="${PROJECT_ROOT:-${SHELLSPEC_PROJECT_ROOT:-$(pwd)}}"
+COMMANDS_ROOT="${COMMANDS_ROOT:-$PROJECT_ROOT/plugins/idd-framework/commands}"
 
 # テスト対象のライブラリを読み込み
 # shellcheck disable=SC1091
-. "$PROJECT_ROOT/.claude/commands/_libs/io-utils.lib.sh"
+. "$COMMANDS_ROOT/_libs/io-utils.lib.sh"
 
 Describe 'io-utils.lib.sh'
   Describe 'error_print() function'

@@ -29,7 +29,8 @@
 #
 
 PROJECT_ROOT="${PROJECT_ROOT:-${SHELLSPEC_PROJECT_ROOT:-$(pwd)}}"
-HELPERS_DIR="$PROJECT_ROOT/.claude/commands/__tests__/__helpers"
+COMMANDS_ROOT="${COMMANDS_ROOT:-$PROJECT_ROOT/plugins/idd-framework/commands}"
+HELPERS_DIR="$COMMANDS_ROOT/__tests__/__helpers"
 . "$HELPERS_DIR/idd-issue-branch-functions.lib.sh"
 
 # Setup branch functions from branch.md
@@ -222,7 +223,7 @@ Describe 'detect_domain() - T3 priority-based coordinator'
 
   Describe 'Given: generate_branch_name function'
     # Source filename-utils.lib.sh for generate_slug dependency
-    LIBS_DIR="$SHELLSPEC_PROJECT_ROOT/.claude/commands/_libs"
+    LIBS_DIR="$COMMANDS_ROOT/_libs"
     Include "$LIBS_DIR/filename-utils.lib.sh"
 
     Context 'When: generating basic branch name'

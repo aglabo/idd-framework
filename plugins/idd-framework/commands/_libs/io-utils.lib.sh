@@ -71,8 +71,8 @@ is_non_ascii() {
   non_ascii_chars=$(printf '%s' "$text" | LC_ALL=C sed 's/[\x00-\x7F]//g')
 
   if [ -n "$non_ascii_chars" ]; then
-    return 0  # non-ASCII found
+    return 0 # non-ASCII found
   fi
 
-  return 1  # pure ASCII
+  return 1 # pure ASCII
 }

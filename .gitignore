@@ -102,4 +102,5 @@ tmp/
 !.vscode/cspell*
 
 ## Node
+.pnpm-store/
 node_modules/

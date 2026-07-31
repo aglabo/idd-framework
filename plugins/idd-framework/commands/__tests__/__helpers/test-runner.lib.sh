@@ -107,7 +107,7 @@ print_test_files() {
   while IFS= read -r file; do
     local rel_path="${file#"$base_dir"/}"
     echo "  - $rel_path"
-  done <<< "$test_files"
+  done <<<"$test_files"
   echo ""
 }
 
@@ -145,7 +145,7 @@ print_test_result() {
 # @exitcode 0 shellspec found
 # @exitcode 1 shellspec not found
 check_shellspec() {
-  if ! command -v shellspec &> /dev/null; then
+  if ! command -v shellspec &>/dev/null; then
     print_test_message "$TEST_RED" "❌ Error: shellspec not found"
     echo ""
     echo "Please install shellspec:"
@@ -196,7 +196,7 @@ find_tests_by_level() {
     fi
   done
 
-  test_files="${test_files%$'\n'}"  # Remove trailing newline
+  test_files="${test_files%$'\n'}" # Remove trailing newline
 
   if [[ -z "$test_files" ]]; then
     print_test_message "$TEST_YELLOW" "⚠️  Warning: No ${level} tests found in $test_dir"

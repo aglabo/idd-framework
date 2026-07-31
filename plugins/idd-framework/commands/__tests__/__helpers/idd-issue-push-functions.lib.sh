@@ -282,6 +282,7 @@ setup_main_routine() {
     fi
 
     # Step 3: Validate issue file
+    local issue_file=""
     if ! _validate_issue_file "$ISSUES_DIR" "$filename"; then
       return 1
     fi
@@ -296,14 +297,14 @@ setup_main_routine() {
     if [[ "$filename" =~ ^new- ]]; then
       push_new_issue "$title" "$body" || push_exit_code=$?
       if [[ $push_exit_code -ne 0 ]]; then
-        return $push_exit_code
+        return "$push_exit_code"
       fi
 
       # T5: Rename file for new issue
       local rename_exit_code=0
       rename_new_issue_file "$filename" "$issue_number" || rename_exit_code=$?
       if [[ $rename_exit_code -ne 0 ]]; then
-        return $rename_exit_code
+        return "$rename_exit_code"
       fi
 
       # T5: Update session with new filename
@@ -313,7 +314,7 @@ setup_main_routine() {
     else
       push_existing_issue "$filename" "$title" "$body" || push_exit_code=$?
       if [[ $push_exit_code -ne 0 ]]; then
-        return $push_exit_code
+        return "$push_exit_code"
       fi
 
       # T5: Update session (no rename needed)

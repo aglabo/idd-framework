@@ -113,6 +113,6 @@ get_file_timestamp() {
   fi
 
   # クロスプラットフォーム対応
-  stat -c %y "$file_path" 2>/dev/null | cut -d' ' -f1,2 | cut -d: -f1,2 || \
+  stat -c %y "$file_path" 2>/dev/null | cut -d' ' -f1,2 | cut -d: -f1,2 ||
     date -r "$file_path" '+%Y-%m-%d %H:%M' 2>/dev/null
 }

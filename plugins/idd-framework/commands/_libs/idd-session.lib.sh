@@ -188,7 +188,7 @@ _save_session() {
     else
       echo "LAST_MODIFIED=\"$(date -Iseconds 2>/dev/null || date +%Y-%m-%dT%H:%M:%S)\""
     fi
-  } > "$session_file"
+  } >"$session_file"
 }
 
 ##
@@ -243,7 +243,7 @@ _save_last_file() {
     return 1
   fi
 
-  echo "$filename" > "$dir/.last_draft"
+  echo "$filename" >"$dir/.last_draft"
 }
 
 ##

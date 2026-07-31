@@ -28,9 +28,9 @@ thumbs.db
 $~*
 ~*
 *~
-*tmp
-*swp
-*lock
+*.tmp
+*.swp
+*.lock
 
 # session files
 *session.json
@@ -42,35 +42,48 @@ $~*
 .env*
 .env.*
 
+# release
+releases/*
+!releases/.keep
+
+##  Git
+!**/.gitignore
+
 ## Development tools (installed locally)
 .tools/
 
+## beads
+.beads/*
+
 ## Worktrees
-#  Git worktrees base dir
+# worktree base dir
 .worktrees/
 
 ## AI generated files
 
 ## Coding AI depended
 # SDD (Spec-Driven Development) files
-**/.cc-sdd/
 
 # claude code setting
 .claude/*
 
+# settings
+!.claude/**/settings.json
+
 # agents can tracking
+!**/CLAUDE*.md
 !.claude/agents/
 !.claude/agents/**
-!.claude/commands/
-!.claude\commands/*
 !.claude/rules/
 !.claude/rules/**
+!.claude/commands/
+!.claude/commands/**
 
 # MCP server dependency files
 .cocoindex_code/
 .serena/
 .lsmcp/
-.codegraph/
+.codegraph/*
 
 ## Temporary directories are never tracked
 temp/

@@ -7,11 +7,12 @@
 // https://opensource.org/licenses/MIT
 
 // commit lint common configs
+
 const defaultConfig = {
   extends: ['@commitlint/config-conventional'],
   parserPreset: {
     parserOpts: {
-      headerPattern: /^(?:(merge)[\s]+\(#(\d+)\): )?(\w*)(?:\(([^)]*)\))?!?: (.+)$/,
+      headerPattern: /^(?:(merge)\s+\(#(\d+)\):\s+)?(\w*)(?:\(([^)]*)\))?!?: (.+)$/,
       headerCorrespondence: [
         'merge',
         'pr',

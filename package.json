@@ -7,30 +7,25 @@
   "license": "MIT",
   "type": "module",
   "keywords": [],
-  "packageManager": "pnpm@11.3.0",
+  "packageManager": "pnpm@11.18.0",
   "engines": {
-    "node": ">=22",
+    "node": ">=24",
     "pnpm:": ">=11"
   },
   "scripts": {
     "prepare": "bash ./scripts/setup-dev-env.sh",
     "plugin:build": "bash scripts/build-plugin.sh",
-    "lint:shell": "bash -c 'shellcheck -x scripts/*.sh'",
-    "test:scripts": "bash scripts/run-shellspec.sh ",
-    "test:scripts:watch": "bash -c 'shellspec --watch'",
-    "test:scripts:all": "concurrently \"pnpm run test:scripts:unit\" \"pnpm run test:scripts:functional\" \"pnpm run test:scripts:integration\" \"pnpm run test:scripts:e2e\"",
-    "test:scripts:unit": "bash scripts/run-shellspec.sh unit",
-    "test:scripts:functional": "bash scripts/run-shellspec.sh functional",
-    "test:scripts:integration": "bash scripts/run-shellspec.sh integration",
-    "test:scripts:e2e": "bash scripts/run-shellspec.sh e2e ",
-    "lint:claude": "bash -c 'shellcheck -x .claude/commands/**/*.sh'",
-    "test:claude": "bash .claude/commands/__tests__/run-tests.sh",
-    "test:claude:all": "concurrently \"pnpm run test:claude:unit\" \"pnpm run test:claude:functional\" \"pnpm run test:claude:integration\" \"pnpm run test:claude:e2e\"",
-    "test:claude:unit": "bash .claude/commands/__tests__/run-tests.sh unit",
-    "test:claude:functional": "bash .claude/commands/__tests__/run-tests.sh functional",
-    "test:claude:integration": "bash .claude/commands/__tests__/run-tests.sh integration",
-    "test:claude:e2e": "bash .claude/commands/__tests__/run-tests.sh e2e"
-  },
-  "devDependencies": {
+    "scan:secrets": "concurrently \"betterleaks protect --config ./configs/betterleaks.toml\" \"secretlint --secretlintrc ./configs/secretlint.config.yaml .\"",
+    "check:sh": "bash runners/run-shfmt.sh --list .",
+    "format:sh": "bash runners/run-shfmt.sh --format .",
+    "check:dprint": "dprint check",
+    "format:dprint": "dprint fmt",
+    "lint:sh": "bash runners/run-shellcheck.sh ",
+    "test:sh": "bash runners/run-shellspec.sh ",
+    "test:sh:all": "bash runners/run-shellspec.sh all",
+
+    "lint:spells": "cspell --config .vscode/cspell.json --cache --cache-location .cache/cspell/cSpellCache ",
+    "lint:text": "textlint --config ${XDG_CONFIG_HOME}/linters/textlint/textlintrc.yaml ",
+    "lint:markdown": "markdownlint --config ${XDG_CONFIG_HOME}/linters/markdownlint/.markdownlint-cli2.yaml "
   }
 }

@@ -72,7 +72,7 @@ fi
 # @stdout Help message
 # @exitcode 0 Always successful
 show_help() {
-  cat << 'EOF'
+  cat <<'EOF'
 Usage: run-tests.sh <subcommand> [test_file]
 
 Unified test runner for shellspec tests across all test levels.
@@ -235,16 +235,16 @@ main() {
 
   # Route to appropriate handler
   case "$subcommand" in
-    all)
-      run_all_levels
-      ;;
-    unit|functional|integration|e2e)
-      run_single_level "$subcommand" "$@"
-      ;;
-    *)
-      print_test_message "$TEST_RED" "❌ Error: Unexpected subcommand '$subcommand'"
-      exit 2
-      ;;
+  all)
+    run_all_levels
+    ;;
+  unit | functional | integration | e2e)
+    run_single_level "$subcommand" "$@"
+    ;;
+  *)
+    print_test_message "$TEST_RED" "❌ Error: Unexpected subcommand '$subcommand'"
+    exit 2
+    ;;
   esac
 }
 

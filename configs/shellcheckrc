@@ -1,5 +1,5 @@
-// Copyright (c) 2026 Furukawa Atsushi <atsushifx@gmail.com># src: configs/shellcheckrc
-# @(#) : shellcheck configuration for aplys shell scripts
+# src: configs/shellcheckrc
+# @(#) : shellcheck configuration for shell scripts
 #
 # Copyright (c) 2026- atsushifx <https://github.com/atsushifx>
 #
@@ -12,7 +12,9 @@ shell=bash
 # Minimum severity to report (style = all categories: error/warning/info/style)
 severity=style
 
-# SC2317 - unreachable code after return/exit
-#   shellspec test framework patterns; also present in .tools/shellspec/.shellcheckrc
-disable=SC2317
-
+# SC1090/SC1091 - dynamic/test helper source paths are resolved at runtime
+# SC2016 - ShellSpec hooks intentionally defer variable expansion
+# SC2034 - ShellSpec assertions and mock state inspect variables indirectly
+# SC2053 - test runner intentionally uses glob pattern matching
+# SC2317/SC2329 - ShellSpec/test mock functions are invoked indirectly
+disable=SC1090,SC1091,SC2016,SC2034,SC2053,SC2317,SC2329

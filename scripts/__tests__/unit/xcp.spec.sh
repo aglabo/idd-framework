@@ -187,7 +187,7 @@ Describe 'xcp.sh - Core Functions Unit Tests'
         The output should include "Backed up:"
         # Verify backup file was created (original dest_file was moved)
         The path "$dest_file" should not exist
-        backup_count=$(ls -1 "${dest_file}.bak."* 2>/dev/null | wc -l)
+        backup_count=$(find "$(dirname "$dest_file")" -maxdepth 1 -name "$(basename "$dest_file").bak.*" -type f | wc -l)
         The variable backup_count should equal 1
 
         # Cleanup

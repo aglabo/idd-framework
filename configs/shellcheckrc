@@ -1,4 +1,4 @@
-# src: configs/shellcheckrc
+// Copyright (c) 2026 Furukawa Atsushi <atsushifx@gmail.com># src: configs/shellcheckrc
 # @(#) : shellcheck configuration for aplys shell scripts
 #
 # Copyright (c) 2026- atsushifx <https://github.com/atsushifx>
@@ -15,3 +15,4 @@ severity=style
 # SC2317 - unreachable code after return/exit
 #   shellspec test framework patterns; also present in .tools/shellspec/.shellcheckrc
 disable=SC2317
+

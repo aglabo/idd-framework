@@ -83,7 +83,7 @@ releases/*
 .cocoindex_code/
 .serena/
 .lsmcp/
-.codegraph/*
+.codegraph/
 
 ## Temporary directories are never tracked
 temp/
@@ -102,4 +102,5 @@ tmp/
 !.vscode/cspell*
 
 ## Node
+.pnpm-store/
 node_modules/

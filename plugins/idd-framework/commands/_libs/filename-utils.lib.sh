@@ -99,7 +99,7 @@ generate_slug() {
   slug="${slug:0:$max_length}"
 
   # Remove trailing incomplete word if truncated (cut at last hyphen)
-  if [ ${#slug} -eq $max_length ]; then
+  if [ ${#slug} -eq "$max_length" ]; then
     slug="${slug%-*}"  # Remove everything after last hyphen for complete words only
   fi
 

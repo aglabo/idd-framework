@@ -209,14 +209,14 @@ has_existing_message() {
 #   context=$(make_context_block)
 #   echo "$context" | claude -p
 make_context_block() {
-  echo ""
-  echo "===== GIT LOGS ====="
+  echo "----- GIT LOGS -----"
   git log --oneline -10 || echo "No logs available."
+  echo "----- END LOGS -----"
   echo ""
 
-  echo "===== GIT DIFF ====="
+  echo "----- GIT DIFF -----"
   git diff --cached || echo "No diff available."
-  echo "===== END DIFF ====="
+  echo "----- END DIFF -----"
 }
 
 ##
@@ -346,8 +346,8 @@ generate_commit_message() {
   # Extract the commit message from AI response
   # Skip context output and extract only the message between markers
   local after_diff
-  if echo "$full_output" | grep -q "^===== END DIFF =====$"; then
-    after_diff=$(echo "$full_output" | sed -n '/^===== END DIFF =====$/,$p' | sed '1d')
+  if echo "$full_output" | grep -q "^----- END DIFF -----$"; then
+    after_diff=$(echo "$full_output" | sed -n '/^----- END DIFF -----$/,$p' | sed '1d')
   else
     after_diff="$full_output"
   fi
@@ -396,15 +396,16 @@ generate_commit_message() {
 #   output_commit_message "$commit_msg"
 output_commit_message() {
   local commit_msg="$1"
+  local output_file="${2:-${OUTPUT_FILE}}"
 
-  if [[ -z "$OUTPUT_FILE" ]]; then
+  if [[ "${FLAG_OUTPUT_TO_STDOUT:-}" == "true" || -z "$output_file" ]]; then
     # Output to stdout (interactive mode)
     echo "$commit_msg"
   else
     # Write to file (Git hook mode)
-    rm -f "${OUTPUT_FILE}"
-    echo "${commit_msg}" >"${OUTPUT_FILE}"
-    echo "[OK] Commit message written to $OUTPUT_FILE" >&2
+    rm -f "${output_file}"
+    echo "${commit_msg}" >"${output_file}"
+    echo "✦ Commit message written to ${output_file}" >&2
   fi
 }
 

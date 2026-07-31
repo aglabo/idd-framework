@@ -39,14 +39,15 @@ setup_branch_functions() {
   # Source the actual implementation from branch.md
   local repo_root
   repo_root=$(git rev-parse --show-toplevel)
+  local commands_root="${COMMANDS_ROOT:-$repo_root/plugins/idd-framework/commands}"
 
   # Load required libraries
-  . "$repo_root/.claude/commands/_libs/io-utils.lib.sh"
-  . "$repo_root/.claude/commands/_libs/filename-utils.lib.sh"
-  . "$repo_root/.claude/commands/_libs/idd-session.lib.sh"
+  . "$commands_root/_libs/io-utils.lib.sh"
+  . "$commands_root/_libs/filename-utils.lib.sh"
+  . "$commands_root/_libs/idd-session.lib.sh"
 
   # Extract and source shell functions from branch.md
-  local branch_md="$repo_root/.claude/commands/idd/issue/branch.md"
+  local branch_md="$commands_root/idd/issue/branch.md"
 
   # Extract bash code blocks from Script Library section using awk
   # Create temporary file to avoid stdin sourcing issues

@@ -57,7 +57,7 @@ parse_issue_number_from_url() {
   local gh_output="$1"
 
   # Extract issue number from URL using sed (portable)
-  issue_number=$(echo "$gh_output" | \
+  issue_number=$(echo "$gh_output" |
     sed -n 's|.*https://github.com/[^/]*/[^/]*/issues/\([0-9]*\).*|\1|p' | head -n 1)
 
   if [[ -z "$issue_number" ]]; then
@@ -108,8 +108,8 @@ push_new_issue() {
   fi
 
   # Extract full URL using sed (portable)
-  issue_url=$(echo "$gh_output" | \
-    sed -n 's|.*\(https://github.com/[^/]*/[^/]*/issues/[0-9]*\).*|\1|p' | \
+  issue_url=$(echo "$gh_output" |
+    sed -n 's|.*\(https://github.com/[^/]*/[^/]*/issues/[0-9]*\).*|\1|p' |
     head -n 1)
 
   echo "✅ Issue created: #$issue_number"
@@ -263,16 +263,16 @@ setup_main_routine() {
 
     if [[ $prereq_exit_code -ne 0 ]]; then
       case $prereq_exit_code in
-        1)
-          echo "❌ Error: 'gh' command not found."
-          echo "💡 Please install GitHub CLI: https://cli.github.com/"
-          return 1
-          ;;
-        2)
-          echo "❌ Error: GitHub authentication required."
-          echo "💡 Run: gh auth login"
-          return 2
-          ;;
+      1)
+        echo "❌ Error: 'gh' command not found."
+        echo "💡 Please install GitHub CLI: https://cli.github.com/"
+        return 1
+        ;;
+      2)
+        echo "❌ Error: GitHub authentication required."
+        echo "💡 Run: gh auth login"
+        return 2
+        ;;
       esac
     fi
 

@@ -52,8 +52,8 @@ setup_branch_functions() {
   # Extract bash code blocks from Script Library section using awk
   # Create temporary file to avoid stdin sourcing issues
   BRANCH_FUNCTIONS_TEMP_SCRIPT="${TMPDIR:-/tmp}/branch-functions-$$.sh"
-  sed -n '/^## スクリプトライブラリ/,/^## License$/p' "$branch_md" | \
-    awk '/^```bash$/ {flag=1; next} /^```$/ {flag=0; next} flag' > "$BRANCH_FUNCTIONS_TEMP_SCRIPT"
+  sed -n '/^## スクリプトライブラリ/,/^## License$/p' "$branch_md" |
+    awk '/^```bash$/ {flag=1; next} /^```$/ {flag=0; next} flag' >"$BRANCH_FUNCTIONS_TEMP_SCRIPT"
 
   # Source the extracted functions
   . "$BRANCH_FUNCTIONS_TEMP_SCRIPT"
@@ -100,7 +100,7 @@ create_test_last_session() {
       echo "LAST_BRANCH_NAME=\"$branch_name\""
     fi
     echo 'LAST_MODIFIED="2025-10-26T10:00:00+09:00"'
-  } > "$session_file"
+  } >"$session_file"
 }
 
 ##
@@ -126,7 +126,7 @@ create_test_branch_session() {
     echo "base_branch=\"$base_branch\""
     echo "issue_number=\"$issue_number\""
     echo 'LAST_MODIFIED="2025-10-26T10:00:00+09:00"'
-  } > "$session_file"
+  } >"$session_file"
 }
 
 # =============================================================================
@@ -148,13 +148,13 @@ mock_codex_mcp() {
   # Parse --prompt argument
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --prompt)
-        prompt="$2"
-        shift 2
-        ;;
-      *)
-        shift
-        ;;
+    --prompt)
+      prompt="$2"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
     esac
   done
 
@@ -164,30 +164,30 @@ mock_codex_mcp() {
 
     # Simple domain inference based on keywords
     case "$title" in
-      *"/idd-issue"*|*"claude-commands"*)
-        echo "claude-commands"
-        return 0
-        ;;
-      *"xcp.sh"*|*"scripts"*)
-        echo "scripts"
-        return 0
-        ;;
-      *"README"*|*"docs"*)
-        echo "docs"
-        return 0
-        ;;
-      *"Add"*|*"Implement"*)
-        echo "feature"
-        return 0
-        ;;
-      *"Fix"*)
-        echo "bugfix"
-        return 0
-        ;;
-      *)
-        # Unknown case - simulate failure
-        return 1
-        ;;
+    *"/idd-issue"* | *"claude-commands"*)
+      echo "claude-commands"
+      return 0
+      ;;
+    *"xcp.sh"* | *"scripts"*)
+      echo "scripts"
+      return 0
+      ;;
+    *"README"* | *"docs"*)
+      echo "docs"
+      return 0
+      ;;
+    *"Add"* | *"Implement"*)
+      echo "feature"
+      return 0
+      ;;
+    *"Fix"*)
+      echo "bugfix"
+      return 0
+      ;;
+    *)
+      # Unknown case - simulate failure
+      return 1
+      ;;
     esac
   fi
 
@@ -232,22 +232,22 @@ detect_domain() {
 
   # Priority 3: Map issue_type to default domain (fallback)
   case "$issue_type" in
-    bug)
-      echo "bugfix"
-      ;;
-    feature)
-      echo "feature"
-      ;;
-    enhancement)
-      echo "enhancement"
-      ;;
-    task)
-      echo "task"
-      ;;
-    *)
-      # Fallback to issue_type as-is
-      echo "$issue_type"
-      ;;
+  bug)
+    echo "bugfix"
+    ;;
+  feature)
+    echo "feature"
+    ;;
+  enhancement)
+    echo "enhancement"
+    ;;
+  task)
+    echo "task"
+    ;;
+  *)
+    # Fallback to issue_type as-is
+    echo "$issue_type"
+    ;;
   esac
 
   # No title found - simulate failure

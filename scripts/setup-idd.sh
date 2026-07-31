@@ -47,7 +47,7 @@ cd "$REPO_ROOT" || exit 1
 
 # 1. Check jq installation
 echo "🔍 Checking jq installation..."
-if ! command -v jq &> /dev/null; then
+if ! command -v jq &>/dev/null; then
   echo "❌ jq not found. Please install jq."
   echo ""
   echo "Installation instructions:"

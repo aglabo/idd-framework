@@ -89,10 +89,10 @@ generate_slug() {
 
   # Convert to lowercase, replace spaces and special chars with hyphens
   local slug
-  slug=$(printf '%s' "$text" | \
-    tr '[:upper:]' '[:lower:]' | \
-    sed 's/[^a-z0-9]/-/g' | \
-    sed 's/--*/-/g' | \
+  slug=$(printf '%s' "$text" |
+    tr '[:upper:]' '[:lower:]' |
+    sed 's/[^a-z0-9]/-/g' |
+    sed 's/--*/-/g' |
     sed 's/^-//; s/-$//')
 
   # Truncate to max length
@@ -100,7 +100,7 @@ generate_slug() {
 
   # Remove trailing incomplete word if truncated (cut at last hyphen)
   if [ ${#slug} -eq "$max_length" ]; then
-    slug="${slug%-*}"  # Remove everything after last hyphen for complete words only
+    slug="${slug%-*}" # Remove everything after last hyphen for complete words only
   fi
 
   echo "$slug"

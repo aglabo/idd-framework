@@ -524,31 +524,31 @@ assess_copy_preconditions() {
   fi
 
   case $OPERATION_MODE in
-    "$MODE_SKIP")
-      log_info "Skipped (exists): $dest_file"
-      return 1
-      ;;
-    "$MODE_OVERWRITE")
-      log_verbose "Overwriting: $dest_file"
+  "$MODE_SKIP")
+    log_info "Skipped (exists): $dest_file"
+    return 1
+    ;;
+  "$MODE_OVERWRITE")
+    log_verbose "Overwriting: $dest_file"
+    return 0
+    ;;
+  "$MODE_UPDATE")
+    if is_newer "$src" "$dest_file"; then
+      log_verbose "Updating: $src -> $dest_file"
       return 0
-      ;;
-    "$MODE_UPDATE")
-      if is_newer "$src" "$dest_file"; then
-        log_verbose "Updating: $src -> $dest_file"
-        return 0
-      fi
-      log_info "Skipped (not newer): $dest_file"
-      return 1
-      ;;
-    "$MODE_BACKUP")
-      if backup_file "$dest_file"; then
-        return 0
-      fi
-      return 2
-      ;;
-    *)
+    fi
+    log_info "Skipped (not newer): $dest_file"
+    return 1
+    ;;
+  "$MODE_BACKUP")
+    if backup_file "$dest_file"; then
       return 0
-      ;;
+    fi
+    return 2
+    ;;
+  *)
+    return 0
+    ;;
   esac
 }
 
@@ -617,20 +617,20 @@ copy_single_item() {
   assess_copy_preconditions "$src" "$dest_file"
   precondition_status=$?
   case $precondition_status in
-    0)
-      ;;
-    1)
-      # Skipped - not an error
-      return 0
-      ;;
-    2)
-      # Error in precondition
-      if [[ $FLAG_FAIL_FAST -eq 1 ]]; then
-        FLAG_ABORT_REQUESTED=1
-        log_verbose "Fail-fast requested after precondition failure: $src -> $dest_file"
-      fi
-      return 1
-      ;;
+  0)
+    ;;
+  1)
+    # Skipped - not an error
+    return 0
+    ;;
+  2)
+    # Error in precondition
+    if [[ $FLAG_FAIL_FAST -eq 1 ]]; then
+      FLAG_ABORT_REQUESTED=1
+      log_verbose "Fail-fast requested after precondition failure: $src -> $dest_file"
+    fi
+    return 1
+    ;;
   esac
 
   # Perform copy operation
@@ -749,16 +749,16 @@ copy_directory_tree() {
   check_destination_directory "$dest"
   dest_check_status=$?
   case $dest_check_status in
-    0)
-      ;;
-    2)
-      if ! create_destination_directory "$dest"; then
-        return 1
-      fi
-      ;;
-    *)
+  0)
+    ;;
+  2)
+    if ! create_destination_directory "$dest"; then
       return 1
-      ;;
+    fi
+    ;;
+  *)
+    return 1
+    ;;
   esac
 
   if [[ $FLAG_DRY_RUN -eq 1 ]]; then
@@ -856,16 +856,16 @@ main() {
   check_destination_directory "$dest_dir"
   dest_check_status=$?
   case $dest_check_status in
-    0)
-      ;;
-    2)
-      if ! create_destination_directory "$dest_dir"; then
-        return 1
-      fi
-      ;;
-    *)
+  0)
+    ;;
+  2)
+    if ! create_destination_directory "$dest_dir"; then
       return 1
-      ;;
+    fi
+    ;;
+  *)
+    return 1
+    ;;
   esac
 
   # Process each source
@@ -942,11 +942,11 @@ DEST_ARG=
 # @description Display help message (extracted from file header @help block)
 # @stdout Help text with usage and options
 show_help() {
-  sed -n '/^# @help<</,/^#<</p' "${BASH_SOURCE[0]}" \
-    | sed '1d;$d' \
-    | sed 's/^# //' \
-    | sed 's/^#$//' \
-    | sed "s/<SCRIPT_NAME>/$SCRIPT_NAME/g"
+  sed -n '/^# @help<</,/^#<</p' "${BASH_SOURCE[0]}" |
+    sed '1d;$d' |
+    sed 's/^# //' |
+    sed 's/^#$//' |
+    sed "s/<SCRIPT_NAME>/$SCRIPT_NAME/g"
   echo ""
   return 0
 }
@@ -956,12 +956,12 @@ show_help() {
 # @stdout Version and copyright information
 show_version() {
   local copyright_lines
-  copyright_lines=$(sed -n '1,/^$/p' "${BASH_SOURCE[0]}" \
-    | sed -n '/^# @license/,/^$/p' \
-    | sed '1d;$d' \
-    | sed 's/^# //' \
-    | sed 's/^#$//' \
-    | sed '/^$/d')
+  copyright_lines=$(sed -n '1,/^$/p' "${BASH_SOURCE[0]}" |
+    sed -n '/^# @license/,/^$/p' |
+    sed '1d;$d' |
+    sed 's/^# //' |
+    sed 's/^#$//' |
+    sed '/^$/d')
 
   printf '%s version %s\n\n%s\n\n' "$SCRIPT_NAME" "$VERSION" "$copyright_lines"
   return 0
@@ -981,75 +981,75 @@ parse_args() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      -h|--help)
-        show_help
-        return 1
-        ;;
-      -V|--version)
-        show_version
-        return 1
-        ;;
-      -n|--noclobber)
-        OPERATION_MODE=$MODE_SKIP
-        shift
-        ;;
-      -f|--force)
-        OPERATION_MODE=$MODE_OVERWRITE
-        shift
-        ;;
-      -u|--update)
-        OPERATION_MODE=$MODE_UPDATE
-        shift
-        ;;
-      -b|--backup)
-        OPERATION_MODE=$MODE_BACKUP
-        shift
-        ;;
-      -r|-R|--recursive)
-        FLAG_RECURSIVE=1
-        shift
-        ;;
-      -p|--parents)
-        FLAG_PARENTS=1
-        shift
-        ;;
-      -L|--dereference)
-        FLAG_DEREFERENCE=1
-        shift
-        ;;
-      -H|--hidden)
-        FLAG_INCLUDE_HIDDEN=1
-        shift
-        ;;
-      --dry-run)
-        FLAG_DRY_RUN=1
-        shift
-        ;;
-      --fail-fast)
-        FLAG_FAIL_FAST=1
-        shift
-        ;;
-      -v|--verbose)
-        logger_set_level "$LOGGER_LEVEL_VERBOSE"
-        shift
-        ;;
-      -q|--quiet)
-        logger_set_level "$LOGGER_LEVEL_ERROR"
-        shift
-        ;;
-      --)
-        shift
-        break
-        ;;
-      -*)
-        log_error "Unknown option: $1"
-        show_help >&2
-        return 1
-        ;;
-      *)
-        sources+=("$1")
-        shift
-        ;;
+    -h | --help)
+      show_help
+      return 1
+      ;;
+    -V | --version)
+      show_version
+      return 1
+      ;;
+    -n | --noclobber)
+      OPERATION_MODE=$MODE_SKIP
+      shift
+      ;;
+    -f | --force)
+      OPERATION_MODE=$MODE_OVERWRITE
+      shift
+      ;;
+    -u | --update)
+      OPERATION_MODE=$MODE_UPDATE
+      shift
+      ;;
+    -b | --backup)
+      OPERATION_MODE=$MODE_BACKUP
+      shift
+      ;;
+    -r | -R | --recursive)
+      FLAG_RECURSIVE=1
+      shift
+      ;;
+    -p | --parents)
+      FLAG_PARENTS=1
+      shift
+      ;;
+    -L | --dereference)
+      FLAG_DEREFERENCE=1
+      shift
+      ;;
+    -H | --hidden)
+      FLAG_INCLUDE_HIDDEN=1
+      shift
+      ;;
+    --dry-run)
+      FLAG_DRY_RUN=1
+      shift
+      ;;
+    --fail-fast)
+      FLAG_FAIL_FAST=1
+      shift
+      ;;
+    -v | --verbose)
+      logger_set_level "$LOGGER_LEVEL_VERBOSE"
+      shift
+      ;;
+    -q | --quiet)
+      logger_set_level "$LOGGER_LEVEL_ERROR"
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      log_error "Unknown option: $1"
+      show_help >&2
+      return 1
+      ;;
+    *)
+      sources+=("$1")
+      shift
+      ;;
     esac
   done
 

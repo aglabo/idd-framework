@@ -35,8 +35,8 @@
 # =============================================================================
 
 # Session operations
-: "${mock_session_load_fails:=0}"          # 0=success, 1=fail
-: "${mock_session_save_fails:=0}"          # 0=success, 1=fail
+: "${mock_session_load_fails:=0}" # 0=success, 1=fail
+: "${mock_session_save_fails:=0}" # 0=success, 1=fail
 : "${mock_session_filename:=new-bug-login}"
 : "${mock_session_issue_number:=}"
 : "${mock_session_title:=Test Issue Title}"
@@ -45,11 +45,11 @@
 : "${mock_session_branch_type:=fix}"
 
 # File operations
-: "${mock_file_not_found:=0}"              # 0=file exists, 1=not found
-: "${mock_file_exists:=1}"                 # 1=file exists, 0=not found (for _validate_issue_file)
+: "${mock_file_not_found:=0}" # 0=file exists, 1=not found
+: "${mock_file_exists:=1}"    # 1=file exists, 0=not found (for _validate_issue_file)
 
 # Content extraction
-: "${mock_extract_fails:=0}"               # 0=success, 1=fail
+: "${mock_extract_fails:=0}" # 0=success, 1=fail
 : "${mock_extracted_title:=}"
 : "${mock_extracted_body:=Test issue body content with details.}"
 
@@ -73,7 +73,7 @@ setup_load_session_mock() {
     issue_number="${mock_session_issue_number:-}"
     command="push"
     TITLE="${mock_session_title:-Test Issue Title}"
-    title="${TITLE}"  # Set both uppercase and lowercase for compatibility
+    title="${TITLE}" # Set both uppercase and lowercase for compatibility
     ISSUE_TYPE="${mock_session_issue_type:-bug}"
     COMMIT_TYPE="${mock_session_commit_type:-fix}"
     BRANCH_TYPE="${mock_session_branch_type:-fix}"

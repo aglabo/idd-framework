@@ -17,6 +17,7 @@ set -euo pipefail
 SHELLSPEC="${SHELLSPEC:-${PROJECT_ROOT}/.tools/shellspec/shellspec}"
 
 readonly TEST_TYPES=("all" "unit" "functional" "integration" "system" "e2e")
+readonly SPEC_DIR_BASE="__tests__"
 
 SKIP_INTEGRATION_TESTS="${SKIP_INTEGRATION_TESTS:-1}"
 SPEC_SEARCH_ROOT="${SPEC_SEARCH_ROOT:-${PROJECT_ROOT}}"
@@ -93,9 +94,9 @@ get_spec_files() {
 
   local type_filter
   if [[ "$test_type" == "all" ]]; then
-    type_filter="tests"
+    type_filter="$SPEC_DIR_BASE"
   else
-    type_filter="tests/${test_type}"
+    type_filter="${SPEC_DIR_BASE}/${test_type}"
   fi
 
   local -a spec_files

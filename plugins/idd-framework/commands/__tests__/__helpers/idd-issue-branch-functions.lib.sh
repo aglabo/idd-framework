@@ -52,8 +52,8 @@ setup_branch_functions() {
   # Extract bash code blocks from Script Library section using awk
   # Create temporary file to avoid stdin sourcing issues
   BRANCH_FUNCTIONS_TEMP_SCRIPT="${TMPDIR:-/tmp}/branch-functions-$$.sh"
-  sed -n '/^## スクリプトライブラリ/,/^## License$/p' "$branch_md" | \
-    awk '/^```bash$/ {flag=1; next} /^```$/ {flag=0; next} flag' > "$BRANCH_FUNCTIONS_TEMP_SCRIPT"
+  sed -n '/^## スクリプトライブラリ/,/^## License$/p' "$branch_md" |
+    awk '/^```bash$/ {flag=1; next} /^```$/ {flag=0; next} flag' >"$BRANCH_FUNCTIONS_TEMP_SCRIPT"
 
   # Source the extracted functions
   . "$BRANCH_FUNCTIONS_TEMP_SCRIPT"
@@ -71,6 +71,62 @@ cleanup_branch_functions() {
     rm -f "$BRANCH_FUNCTIONS_TEMP_SCRIPT"
   fi
   return 0
+}
+
+# =============================================================================
+# Test Session Fixtures
+# =============================================================================
+
+##
+# @brief Create a .last.session fixture for branch command tests
+# @param $1 Session file path
+# @param $2 Existing branch name (optional)
+##
+create_test_last_session() {
+  local session_file="$1"
+  local branch_name="${2:-}"
+
+  mkdir -p "$(dirname "$session_file")"
+  {
+    echo "# Last session"
+    echo 'LAST_ISSUE_FILE="issue-027-add-feature.md"'
+    echo 'LAST_ISSUE_NUMBER="027"'
+    echo 'LAST_COMMAND="new"'
+    echo 'LAST_ISSUE_TITLE="Add feature"'
+    echo 'LAST_ISSUE_TYPE="feature"'
+    echo 'LAST_COMMIT_TYPE="feat"'
+    echo 'LAST_BRANCH_TYPE="feat"'
+    if [ -n "$branch_name" ]; then
+      echo "LAST_BRANCH_NAME=\"$branch_name\""
+    fi
+    echo 'LAST_MODIFIED="2025-10-26T10:00:00+09:00"'
+  } >"$session_file"
+}
+
+##
+# @brief Create a .branch.session fixture for branch command tests
+# @param $1 Session file path
+# @param $2 Suggested branch
+# @param $3 Domain (optional)
+# @param $4 Base branch (optional)
+# @param $5 Issue number (optional)
+##
+create_test_branch_session() {
+  local session_file="$1"
+  local suggested_branch="$2"
+  local domain="${3:-test}"
+  local base_branch="${4:-main}"
+  local issue_number="${5:-27}"
+
+  mkdir -p "$(dirname "$session_file")"
+  {
+    echo "# Last session"
+    echo "suggested_branch=\"$suggested_branch\""
+    echo "domain=\"$domain\""
+    echo "base_branch=\"$base_branch\""
+    echo "issue_number=\"$issue_number\""
+    echo 'LAST_MODIFIED="2025-10-26T10:00:00+09:00"'
+  } >"$session_file"
 }
 
 # =============================================================================
@@ -92,13 +148,13 @@ mock_codex_mcp() {
   # Parse --prompt argument
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --prompt)
-        prompt="$2"
-        shift 2
-        ;;
-      *)
-        shift
-        ;;
+    --prompt)
+      prompt="$2"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
     esac
   done
 
@@ -108,30 +164,30 @@ mock_codex_mcp() {
 
     # Simple domain inference based on keywords
     case "$title" in
-      *"/idd-issue"*|*"claude-commands"*)
-        echo "claude-commands"
-        return 0
-        ;;
-      *"xcp.sh"*|*"scripts"*)
-        echo "scripts"
-        return 0
-        ;;
-      *"README"*|*"docs"*)
-        echo "docs"
-        return 0
-        ;;
-      *"Add"*|*"Implement"*)
-        echo "feature"
-        return 0
-        ;;
-      *"Fix"*)
-        echo "bugfix"
-        return 0
-        ;;
-      *)
-        # Unknown case - simulate failure
-        return 1
-        ;;
+    *"/idd-issue"* | *"claude-commands"*)
+      echo "claude-commands"
+      return 0
+      ;;
+    *"xcp.sh"* | *"scripts"*)
+      echo "scripts"
+      return 0
+      ;;
+    *"README"* | *"docs"*)
+      echo "docs"
+      return 0
+      ;;
+    *"Add"* | *"Implement"*)
+      echo "feature"
+      return 0
+      ;;
+    *"Fix"*)
+      echo "bugfix"
+      return 0
+      ;;
+    *)
+      # Unknown case - simulate failure
+      return 1
+      ;;
     esac
   fi
 
@@ -176,22 +232,22 @@ detect_domain() {
 
   # Priority 3: Map issue_type to default domain (fallback)
   case "$issue_type" in
-    bug)
-      echo "bugfix"
-      ;;
-    feature)
-      echo "feature"
-      ;;
-    enhancement)
-      echo "enhancement"
-      ;;
-    task)
-      echo "task"
-      ;;
-    *)
-      # Fallback to issue_type as-is
-      echo "$issue_type"
-      ;;
+  bug)
+    echo "bugfix"
+    ;;
+  feature)
+    echo "feature"
+    ;;
+  enhancement)
+    echo "enhancement"
+    ;;
+  task)
+    echo "task"
+    ;;
+  *)
+    # Fallback to issue_type as-is
+    echo "$issue_type"
+    ;;
   esac
 
   # No title found - simulate failure

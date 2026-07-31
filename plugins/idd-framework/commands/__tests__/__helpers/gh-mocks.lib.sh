@@ -36,19 +36,19 @@
 # =============================================================================
 
 # Issue operations
-: "${mock_gh_fails:=0}"                    # 0=success, 1=fail
-: "${mock_issue_number:=42}"               # Default issue number for create
-: "${mock_new_issue_number:=42}"           # Alias for compatibility
+: "${mock_gh_fails:=0}"          # 0=success, 1=fail
+: "${mock_issue_number:=42}"     # Default issue number for create
+: "${mock_new_issue_number:=42}" # Alias for compatibility
 
 # Authentication
-: "${mock_gh_not_authenticated:=0}"        # 0=authenticated, 1=not authenticated
+: "${mock_gh_not_authenticated:=0}" # 0=authenticated, 1=not authenticated
 
 # PR operations
-: "${mock_pr_number:=1}"                   # Default PR number
-: "${mock_pr_fails:=0}"                    # PR operation failure flag
+: "${mock_pr_number:=1}" # Default PR number
+: "${mock_pr_fails:=0}"  # PR operation failure flag
 
 # Repository
-: "${mock_repo_name:=user/repo}"           # Default repository name
+: "${mock_repo_name:=user/repo}" # Default repository name
 
 # =============================================================================
 # Main gh Mock Function
@@ -65,22 +65,22 @@ setup_gh_mock() {
     local subcommand="$1"
 
     case "$subcommand" in
-      issue)
-        _gh_mock_issue "$@"
-        ;;
-      pr)
-        _gh_mock_pr "$@"
-        ;;
-      repo)
-        _gh_mock_repo "$@"
-        ;;
-      auth)
-        _gh_mock_auth "$@"
-        ;;
-      *)
-        echo "Mock gh: unknown subcommand '$subcommand'" >&2
-        return 1
-        ;;
+    issue)
+      _gh_mock_issue "$@"
+      ;;
+    pr)
+      _gh_mock_pr "$@"
+      ;;
+    repo)
+      _gh_mock_repo "$@"
+      ;;
+    auth)
+      _gh_mock_auth "$@"
+      ;;
+    *)
+      echo "Mock gh: unknown subcommand '$subcommand'" >&2
+      return 1
+      ;;
     esac
   }
 }
@@ -94,29 +94,29 @@ setup_gh_mock() {
 # @internal
 # @arg $@ All arguments passed to gh issue
 _gh_mock_issue() {
-  shift  # Remove 'issue'
+  shift # Remove 'issue'
   local action="$1"
 
   case "$action" in
-    create)
-      _gh_mock_issue_create "$@"
-      ;;
-    edit)
-      _gh_mock_issue_edit "$@"
-      ;;
-    list)
-      _gh_mock_issue_list "$@"
-      ;;
-    view)
-      _gh_mock_issue_view "$@"
-      ;;
-    close)
-      _gh_mock_issue_close "$@"
-      ;;
-    *)
-      echo "Mock gh issue: unknown action '$action'" >&2
-      return 1
-      ;;
+  create)
+    _gh_mock_issue_create "$@"
+    ;;
+  edit)
+    _gh_mock_issue_edit "$@"
+    ;;
+  list)
+    _gh_mock_issue_list "$@"
+    ;;
+  view)
+    _gh_mock_issue_view "$@"
+    ;;
+  close)
+    _gh_mock_issue_close "$@"
+    ;;
+  *)
+    echo "Mock gh issue: unknown action '$action'" >&2
+    return 1
+    ;;
   esac
 }
 
@@ -148,7 +148,7 @@ _gh_mock_issue_create() {
 # @exitcode 0 If mock_gh_fails=0
 # @exitcode 1 If mock_gh_fails=1
 _gh_mock_issue_edit() {
-  shift  # Remove 'edit'
+  shift # Remove 'edit'
   local issue_num="$1"
 
   if [[ "${mock_gh_fails:-0}" -eq 1 ]]; then
@@ -200,7 +200,7 @@ EOF
 # @exitcode 0 If mock_gh_fails=0
 # @exitcode 1 If mock_gh_fails=1
 _gh_mock_issue_view() {
-  shift  # Remove 'view'
+  shift # Remove 'view'
   local issue_num="$1"
 
   if [[ "${mock_gh_fails:-0}" -eq 1 ]]; then
@@ -227,7 +227,7 @@ EOF
 # @exitcode 0 If mock_gh_fails=0
 # @exitcode 1 If mock_gh_fails=1
 _gh_mock_issue_close() {
-  shift  # Remove 'close'
+  shift # Remove 'close'
   local issue_num="$1"
 
   if [[ "${mock_gh_fails:-0}" -eq 1 ]]; then
@@ -248,23 +248,23 @@ _gh_mock_issue_close() {
 # @internal
 # @arg $@ All arguments passed to gh pr
 _gh_mock_pr() {
-  shift  # Remove 'pr'
+  shift # Remove 'pr'
   local action="$1"
 
   case "$action" in
-    create)
-      _gh_mock_pr_create "$@"
-      ;;
-    list)
-      _gh_mock_pr_list "$@"
-      ;;
-    view)
-      _gh_mock_pr_view "$@"
-      ;;
-    *)
-      echo "Mock gh pr: unknown action '$action'" >&2
-      return 1
-      ;;
+  create)
+    _gh_mock_pr_create "$@"
+    ;;
+  list)
+    _gh_mock_pr_list "$@"
+    ;;
+  view)
+    _gh_mock_pr_view "$@"
+    ;;
+  *)
+    echo "Mock gh pr: unknown action '$action'" >&2
+    return 1
+    ;;
   esac
 }
 
@@ -310,7 +310,7 @@ EOF
 # @stdout JSON object with PR details
 # @exitcode 0 Always successful
 _gh_mock_pr_view() {
-  shift  # Remove 'view'
+  shift # Remove 'view'
   local pr_num="$1"
 
   cat <<EOF
@@ -333,17 +333,17 @@ EOF
 # @internal
 # @arg $@ All arguments passed to gh repo
 _gh_mock_repo() {
-  shift  # Remove 'repo'
+  shift # Remove 'repo'
   local action="$1"
 
   case "$action" in
-    view)
-      _gh_mock_repo_view "$@"
-      ;;
-    *)
-      echo "Mock gh repo: unknown action '$action'" >&2
-      return 1
-      ;;
+  view)
+    _gh_mock_repo_view "$@"
+    ;;
+  *)
+    echo "Mock gh repo: unknown action '$action'" >&2
+    return 1
+    ;;
   esac
 }
 
@@ -354,7 +354,7 @@ _gh_mock_repo() {
 # @stdout Repository name or JSON based on arguments
 # @exitcode 0 Always successful
 _gh_mock_repo_view() {
-  shift  # Remove 'view'
+  shift # Remove 'view'
 
   # Handle --json nameWithOwner -q .nameWithOwner
   if [[ "$*" =~ -q ]]; then
@@ -374,17 +374,17 @@ _gh_mock_repo_view() {
 # @internal
 # @arg $@ All arguments passed to gh auth
 _gh_mock_auth() {
-  shift  # Remove 'auth'
+  shift # Remove 'auth'
   local action="$1"
 
   case "$action" in
-    status)
-      _gh_mock_auth_status "$@"
-      ;;
-    *)
-      echo "Mock gh auth: unknown action '$action'" >&2
-      return 1
-      ;;
+  status)
+    _gh_mock_auth_status "$@"
+    ;;
+  *)
+    echo "Mock gh auth: unknown action '$action'" >&2
+    return 1
+    ;;
   esac
 }
 
@@ -433,22 +433,22 @@ set_gh_mock_failure() {
   local operation="$1"
 
   case "$operation" in
-    issue)
-      mock_gh_fails=1
-      ;;
-    pr)
-      mock_pr_fails=1
-      ;;
-    auth)
-      mock_gh_not_authenticated=1
-      ;;
-    all)
-      mock_gh_fails=1
-      mock_pr_fails=1
-      ;;
-    *)
-      echo "Unknown operation: $operation" >&2
-      return 1
-      ;;
+  issue)
+    mock_gh_fails=1
+    ;;
+  pr)
+    mock_pr_fails=1
+    ;;
+  auth)
+    mock_gh_not_authenticated=1
+    ;;
+  all)
+    mock_gh_fails=1
+    mock_pr_fails=1
+    ;;
+  *)
+    echo "Unknown operation: $operation" >&2
+    return 1
+    ;;
   esac
 }

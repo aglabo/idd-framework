@@ -141,67 +141,67 @@ branch_exists() {
 mock_git() {
   git() {
     case "$1 $2" in
-      "branch --show-current")
-        # Return current branch
+    "branch --show-current")
+      # Return current branch
+      echo "$MOCK_CURRENT_BRANCH"
+      ;;
+
+    "branch --list")
+      # Check if branch exists in associative array
+      if branch_exists "$3"; then
+        echo "$3"
+      fi
+      ;;
+
+    "rev-parse --abbrev-ref")
+      # Support git rev-parse --abbrev-ref HEAD
+      if [ "$3" = "HEAD" ]; then
         echo "$MOCK_CURRENT_BRANCH"
-        ;;
+      fi
+      ;;
 
-      "branch --list")
-        # Check if branch exists in associative array
-        if branch_exists "$3"; then
-          echo "$3"
-        fi
-        ;;
-
-      "rev-parse --abbrev-ref")
-        # Support git rev-parse --abbrev-ref HEAD
-        if [ "$3" = "HEAD" ]; then
-          echo "$MOCK_CURRENT_BRANCH"
-        fi
-        ;;
-
-      "rev-parse --verify")
-        # Support git rev-parse --verify --quiet <branch>
-        # Check if branch exists in associative array
-        if branch_exists "$4"; then
-          echo "$4"
-          return 0
-        fi
-        return 1
-        ;;
-
-      "switch -c")
-         # Create new branch (only if it doesn't already exist)
-         if [ "${MOCK_BRANCHES[$3]}" = 1 ]; then
-           echo "fatal: a branch named '$3' already exists" >&2
-           return 1
-         fi
-         if [ "$MOCK_SWITCH_FAILS" = 1 ]; then
-           echo "fatal: unable to create branch" >&2
-           return 1
-         fi
-         echo "Switched to a new branch '$3'" >&2
-         return 0
-         ;;
-
-      "switch "*)
-         # Switch to existing branch (only if it exists)
-         if [ "${MOCK_BRANCHES[$2]}" != 1 ]; then
-           echo "error: pathspec '$2' did not match any file(s) known to git" >&2
-           return 1
-         fi
-         if [ "$MOCK_SWITCH_FAILS" = 1 ]; then
-           echo "fatal: unable to switch to branch '$2'" >&2
-           return 1
-         fi
-         echo "Switched to branch '$2'" >&2
-         return 0
-         ;;
-
-      *)
-        # Unsupported command - do nothing
+    "rev-parse --verify")
+      # Support git rev-parse --verify --quiet <branch>
+      # Check if branch exists in associative array
+      if branch_exists "$4"; then
+        echo "$4"
         return 0
-        ;;
+      fi
+      return 1
+      ;;
+
+    "switch -c")
+      # Create new branch (only if it doesn't already exist)
+      if [ "${MOCK_BRANCHES[$3]}" = 1 ]; then
+        echo "fatal: a branch named '$3' already exists" >&2
+        return 1
+      fi
+      if [ "$MOCK_SWITCH_FAILS" = 1 ]; then
+        echo "fatal: unable to create branch" >&2
+        return 1
+      fi
+      echo "Switched to a new branch '$3'" >&2
+      return 0
+      ;;
+
+    "switch "*)
+      # Switch to existing branch (only if it exists)
+      if [ "${MOCK_BRANCHES[$2]}" != 1 ]; then
+        echo "error: pathspec '$2' did not match any file(s) known to git" >&2
+        return 1
+      fi
+      if [ "$MOCK_SWITCH_FAILS" = 1 ]; then
+        echo "fatal: unable to switch to branch '$2'" >&2
+        return 1
+      fi
+      echo "Switched to branch '$2'" >&2
+      return 0
+      ;;
+
+    *)
+      # Unsupported command - do nothing
+      return 0
+      ;;
     esac
   }
 }

@@ -31,7 +31,8 @@
 #
 
 PROJECT_ROOT="${PROJECT_ROOT:-${SHELLSPEC_PROJECT_ROOT:-$(pwd)}}"
-LIBS_DIR="$PROJECT_ROOT/.claude/commands/_libs"
+COMMANDS_ROOT="${COMMANDS_ROOT:-$PROJECT_ROOT/plugins/idd-framework/commands}"
+LIBS_DIR="$COMMANDS_ROOT/_libs"
 
 # Mock translator for fast testing without AI dependency
 mock_translator() {

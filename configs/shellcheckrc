@@ -6,15 +6,17 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
+
 # Shell dialect: bash (#!/usr/bin/env bash, bash 4.0+ features used)
 shell=bash
 
 # Minimum severity to report (style = all categories: error/warning/info/style)
 severity=style
 
-# SC1090/SC1091 - dynamic/test helper source paths are resolved at runtime
-# SC2016 - ShellSpec hooks intentionally defer variable expansion
-# SC2034 - ShellSpec assertions and mock state inspect variables indirectly
-# SC2053 - test runner intentionally uses glob pattern matching
-# SC2317/SC2329 - ShellSpec/test mock functions are invoked indirectly
-disable=SC1090,SC1091,SC2016,SC2034,SC2053,SC2317,SC2329
+# Note: shellspec test files (*.spec.sh) are excluded by runners/run-shellcheck.sh,
+#   not here - shellcheck has no path-exclusion directive in its rcfile.
+#   Naming a spec file explicitly still lints it.
+
+# SC2317 - unreachable code after return/exit
+#   shellspec test framework patterns; also present in .tools/shellspec/.shellcheckrc
+disable=SC2317

@@ -1,39 +1,49 @@
-## ShellSpec Configuration
-## Project-wide settings for shell script testing
+# .shellspec - ShellSpec project configuration
+# @(#) : ShellSpec configuration - unified testing options
+#
+# Copyright (c) 2026- atsushifx <https://github.com/atsushifx>
+#
+# This software is released under the MIT License.
+# https://opensource.org/licenses/MIT
 
-# Set shell to bash
+# ============================================================================
+# ShellSpec Configuration
+# ============================================================================
+# This file marks the project root and contains all ShellSpec options.
+# Automatically loaded by ShellSpec.
+#
+# See: https://github.com/shellspec/shellspec
+# ============================================================================
+
+# === Base Configuration ===
+# Core testing setup: helpers, sandbox, and example handling
+
+# shell
 --shell bash
 
-# Specify spec directory
---default-path "scripts/__tests__"
-
-# Spec file pattern (match .spec.sh instead of _spec.sh)
+# File Pattern
 --pattern "*.spec.sh"
 
-# Enable colored output
---color
-
-# Show execution times
-# --profile
---profile-limit=10
-
-# Show failure messages in detail
- --fail-fast=1
-
-# Set formatter (default: progress, options: documentation, tap, junit)
+# Report format (detailed output for CI logs)
 --format documentation
 
-# Coverage settings (requires kcov)
-# --kcov
-# --kcov-options "--exclude-pattern=/usr"
+# Enable color output
+--color
 
-# Execution options
---jobs 32
+# Execution directory (run from project root; specs use root-relative Include paths)
+--execdir @project
 
-# --random none
+# Skip message severity (moderate = hide skipped test details)
+--skip-message moderate
 
-# Output directory for reports
---reportdir "temp/shellspec-reports"
+# Fail if no examples found (prevent silent failures)
+--fail-no-examples
 
-# Warning settings
---warning-as-failure
+# Don't treat warnings as failures (allow exit code 0 with warnings)
+--no-warning-as-failure
+
+# === Parallel Execution ===
+# Spec file parallel execution
+# @note: use in Windows is dangerous.
+--jobs 4
+

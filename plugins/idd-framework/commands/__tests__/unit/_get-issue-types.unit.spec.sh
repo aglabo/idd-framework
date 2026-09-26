@@ -11,7 +11,7 @@ PROJECT_ROOT="${PROJECT_ROOT:-${SHELLSPEC_PROJECT_ROOT:-$(pwd)}}"
 
 # extract_commit_types() 関数定義
 extract_commit_types() {
-  local config_file="${1:-configs/commitlint.config.js}"
+  local config_file="${1:-configs/commitlint.config.mjs}"
 
   [[ ! -f "$config_file" ]] && return 1
 
@@ -106,11 +106,11 @@ EOF
 
 Describe '_get-issue-types.md helper functions'
   Describe 'extract_commit_types() function'
-    Describe 'Given: commitlint.config.js が存在する'
+    Describe 'Given: commitlint.config.mjs が存在する'
       Context 'When: extract_commit_types() を呼び出す'
         It 'Then: [正常] - 有効なJSON配列を返す'
           result() {
-            extract_commit_types "$PROJECT_ROOT/configs/commitlint.config.js" | jq -r 'type'
+            extract_commit_types "$PROJECT_ROOT/configs/commitlint.config.mjs" | jq -r 'type'
           }
           When call result
           The status should be success
@@ -119,7 +119,7 @@ Describe '_get-issue-types.md helper functions'
 
         It 'Then: [正常] - feat type を含む'
           result() {
-            extract_commit_types "$PROJECT_ROOT/configs/commitlint.config.js" | jq -r '.[] | select(.type == "feat") | .type'
+            extract_commit_types "$PROJECT_ROOT/configs/commitlint.config.mjs" | jq -r '.[] | select(.type == "feat") | .type'
           }
           When call result
           The output should include 'feat'
@@ -127,7 +127,7 @@ Describe '_get-issue-types.md helper functions'
 
         It 'Then: [正常] - fix type を含む'
           result() {
-            extract_commit_types "$PROJECT_ROOT/configs/commitlint.config.js" | jq -r '.[] | select(.type == "fix") | .type'
+            extract_commit_types "$PROJECT_ROOT/configs/commitlint.config.mjs" | jq -r '.[] | select(.type == "fix") | .type'
           }
           When call result
           The output should include 'fix'
@@ -135,7 +135,7 @@ Describe '_get-issue-types.md helper functions'
 
         It 'Then: [正常] - 各要素にtype と description を持つ'
           result() {
-            extract_commit_types "$PROJECT_ROOT/configs/commitlint.config.js" | jq -r '.[0] | has("type") and has("description")'
+            extract_commit_types "$PROJECT_ROOT/configs/commitlint.config.mjs" | jq -r '.[0] | has("type") and has("description")'
           }
           When call result
           The output should include 'true'
@@ -143,10 +143,23 @@ Describe '_get-issue-types.md helper functions'
       End
     End
 
-    Describe 'Given: commitlint.config.js が存在しない'
+    Describe 'Given: 引数を省略して呼び出す'
+      Context 'When: extract_commit_types() を引数なしで呼び出す'
+        It 'Then: [エッジケース] - デフォルト引数で .mjs を解決し有効なJSON配列を返す'
+          result() {
+            extract_commit_types | jq -r 'type'
+          }
+          When call result
+          The status should be success
+          The output should include 'array'
+        End
+      End
+    End
+
+    Describe 'Given: commitlint.config.mjs が存在しない'
       Context 'When: 存在しないファイルパスを指定'
         It 'Then: [異常] - 終了コード1を返す'
-          When call extract_commit_types "/nonexistent/path/config.js"
+          When call extract_commit_types "/nonexistent/path/config.mjs"
           The status should equal 1
         End
       End

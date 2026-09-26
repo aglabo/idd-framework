@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
-# src: ./runners/__tests__/unit/get-filelist.lib.unit.spec.sh
+# src: ./runners/libs/__tests__/unit/get-filelist.lib.unit.spec.sh
 # @(#): ShellSpec unit tests for get-filelist.lib.sh get_filelist()
 #
 # @file get-filelist.lib.unit.spec.sh

@@ -151,12 +151,15 @@ parse_options() {
 # @description Resolve spec files from arguments (handles test types, globs, single files).
 #              Must be called in the caller's own shell: the result is a global, never
 #              stdout, because the `system` type also has to set SKIP_INTEGRATION_TESTS
-#              and a subshell would discard that assignment
+#              and a subshell would discard that assignment.
+#              A `get_spec_files` failure is propagated as status 1 without emitting the
+#              no-match warning, so a listing error never degrades into "zero matches"
 # @arg $@ Command line arguments (test type, spec file, or glob pattern)
 # @stderr Error and warning messages
 # @sideeffect Sets RESOLVED_SPEC_FILES to the resolved spec file paths (empty on no match)
 # @sideeffect Sets SKIP_INTEGRATION_TESTS=0 for the `system` test type
-# @exitcode 0 on success, 1 on error
+# @exitcode 0 on success, 1 on error (including a `get_spec_files` failure, which returns 1
+#           with no no-match warning)
 #
 resolve_spec_files() {
   RESOLVED_SPEC_FILES=()
@@ -191,7 +194,11 @@ resolve_spec_files() {
   local test_type="$1"
   shift
   [[ "$test_type" == "system" ]] && SKIP_INTEGRATION_TESTS=0
-  mapfile -t RESOLVED_SPEC_FILES < <(get_spec_files "$test_type" "$@")
+  local __listing
+  if ! __listing=$(get_spec_files "$test_type" "$@"); then
+    return 1
+  fi
+  mapfile -t RESOLVED_SPEC_FILES <<<"$__listing"
   _drop_empty_resolved
   if [[ ${#RESOLVED_SPEC_FILES[@]} -eq 0 ]]; then
     echo "Warning: No spec files found for test type '${test_type}'" >&2
@@ -200,8 +207,11 @@ resolve_spec_files() {
 }
 
 #
-# @description Normalize RESOLVED_SPEC_FILES: a producer emitting a bare newline
-#              leaves mapfile with a single empty element, which is not a spec file
+# @description Normalize RESOLVED_SPEC_FILES: reading an empty listing with a here-string
+#              leaves mapfile with a single empty element, which is not a spec file.
+#              The empty listing is the ordinary zero-match case, so this call is on the
+#              main path and not an edge-case guard -- removing it makes every zero-match
+#              look like one found spec and skips the no-match warning entirely
 # @sideeffect Empties RESOLVED_SPEC_FILES when it holds one empty element
 #
 _drop_empty_resolved() {

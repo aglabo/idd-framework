@@ -46,6 +46,14 @@
 
 Describe 'get-filelist.lib.sh - get_filelist() Unit Tests'
   Include runners/libs/get-filelist.lib.sh
+  Include runners/libs/__tests__/spec_helper.sh
+
+  # このスイートは実 rg を一切呼ばない。その性質を ad hoc な検算ではなく強制された
+  # 不変条件にする: 事故で実 rg に到達した瞬間に stub が status 127 を返して RED になる。
+  # 内側の Context が installs する rg シャドウはこの既定を上書きする (ShellSpec は外側の
+  # BeforeEach を先に走らせる)。functional spec は実 rg を必要とするため opt-in にしてある。
+  BeforeEach 'deny_real_rg'
+  AfterEach 'allow_real_rg'
 
   # 検索ルートには ShellSpec が渡す既存パスをそのまま使い、フィクスチャを作らない。
   # $SHELLSPEC_TMPBASE は run ごとに作られる実ディレクトリ、

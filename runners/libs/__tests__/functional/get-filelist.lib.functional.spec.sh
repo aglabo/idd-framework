@@ -32,11 +32,12 @@
 # https://opensource.org/licenses/MIT
 #
 
-Describe 'get-filelist.lib.sh - get_filelist() Unit Tests'
+Describe 'get-filelist.lib.sh - get_filelist() Functional Tests'
   Include runners/libs/get-filelist.lib.sh
+  Include runners/libs/__tests__/spec_helper.sh
 
   setup() {
-    FIXTURE_DIR="$(mktemp -d)"
+    new_fixture_dir || return 1
     : >"${FIXTURE_DIR}/a.sh"
     : >"${FIXTURE_DIR}/b.spec.sh"
     : >"${FIXTURE_DIR}/note.txt"
@@ -52,14 +53,8 @@ Describe 'get-filelist.lib.sh - get_filelist() Unit Tests'
     : >"${FIXTURE_DIR}/.tools/x.sh"
   }
 
-  cleanup() {
-    if [[ -n "${FIXTURE_DIR:-}" ]]; then
-      rm -rf "$FIXTURE_DIR"
-    fi
-  }
-
   BeforeEach 'setup'
-  AfterEach 'cleanup'
+  AfterEach 'remove_fixture_dir'
 
   # ============================================================================
   # T-01-01: pattern enumeration and output format

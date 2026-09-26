@@ -66,6 +66,10 @@
 !/scripts/**/*.sh
 !/scripts/**/*.ts
 
+# docs
+!/docs/
+!/docs/**
+
 ## AI Agents
 # claude code
 !**/CLAUDE*.md
@@ -128,3 +132,7 @@ $~*
 
 # allow all gitignore
 !**/.gitignore
+
+# deckrd working state (sessions, notes, drafts)
+/docs/.deckrd/idd/
+/docs/.deckrd/notes/

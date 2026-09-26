@@ -1,0 +1,1 @@
+../../plugins/idd-framework/agents/pr-generator.md

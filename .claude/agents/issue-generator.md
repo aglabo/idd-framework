@@ -1,0 +1,1 @@
+../../plugins/idd-framework/agents/issue-generator.md

@@ -12,7 +12,7 @@ description: title (と summary) から commit種別、issue種別、branch種�
 
 # 設定変数
 config:
-  commitlint_config: configs/commitlint.config.js
+  commitlint_config: configs/commitlint.config.mjs
 
 # プロジェクト要素
 title: _get-issue-types
@@ -39,7 +39,7 @@ title と summary から commit種別、issue種別、branch種別を AI判定�
 ### ワークフロー
 
 1. title と summary を引数として受け取る
-2. commitlint.config.js から commit種別を動的抽出
+2. commitlint.config.mjs から commit種別を動的抽出
 3. issue種別定義テーブルを生成
 4. AI判定プロンプトを構築
 5. Codex に送信して AI判定を実行
@@ -47,7 +47,7 @@ title と summary から commit種別、issue種別、branch種別を AI判定�
 
 ### 主要機能
 
-- **commit種別動的抽出**: `configs/commitlint.config.js` から14種類を動的取得
+- **commit種別動的抽出**: `configs/commitlint.config.mjs` から14種類を動的取得
 - **issue種別テーブル生成**: 6種類のissue種別を定義
 - **Codex AI判定**: title/summaryを深層分析して種別を決定
 - **JSON出力**: 判定結果を構造化されたJSON形式で返す
@@ -228,7 +228,7 @@ commit_types_table=$(extract_commit_types)
 [[ -z "$commit_types_table" ]] && output_error "commit types extraction failed"
 ```
 
-`configs/commitlint.config.js` から commit種別を動的抽出します。
+`configs/commitlint.config.mjs` から commit種別を動的抽出します。
 
 #### Step 4: issue種別テーブル生成
 
@@ -326,20 +326,20 @@ EOF
 
 ### extract_commit_types()
 
-commitlint.config.js から commit種別を抽出します。
+commitlint.config.mjs から commit種別を抽出します。
 
 定義:
 
 ```bash
 ##
 # @brief Extract commit types from commitlint config
-# @description Parses configs/commitlint.config.js and extracts commit type definitions as JSON array
+# @description Parses configs/commitlint.config.mjs and extracts commit type definitions as JSON array
 #
-# @given commitlint.config.js にcommit種別定義が存在する
+# @given commitlint.config.mjs にcommit種別定義が存在する
 # @when extract_commit_types() を呼び出す
 # @then JSON配列 [{"type":"feat","description":"..."},...]を標準出力に返す
 #
-# @param $1 Config file path (default: configs/commitlint.config.js)
+# @param $1 Config file path (default: configs/commitlint.config.mjs)
 # @return 0 on success, 1 on file not found
 # @stdout JSON array: [{"type":"feat","description":"New feature"},...]
 # @example
@@ -347,7 +347,7 @@ commitlint.config.js から commit種別を抽出します。
 #   echo "$commit_types_table" | jq '.[0].type'
 ##
 extract_commit_types() {
-  local config_file="${1:-configs/commitlint.config.js}"
+  local config_file="${1:-configs/commitlint.config.mjs}"
 
   [[ ! -f "$config_file" ]] && return 1
 

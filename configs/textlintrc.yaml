@@ -11,7 +11,7 @@ filters:
   comments: true
   allowlist:
     allowlistConfigPaths:
-      - .textlint/allowlist.yml
+      - ./.textlint/allowlist.yml
 rules:
   preset-ja-technical-writing:
     sentence-length:
@@ -24,24 +24,38 @@ rules:
       "preferInBody": "ですます",
       "preferInList": "",
     }
+    no-exclamation-question-mark: false
     ja-no-mixed-period:
       allowPeriodMarks:
         - ":"
-        - "✨"
     no-doubled-joshi:
       strict: false
   "@textlint-ja/preset-ai-writing": true
   preset-ja-spacing:
+    ja-no-space-around-slash: false
+    ja-no-space-around-parentheses: false
     ja-space-between-half-and-full-width:
       space:
         - alphabets
         - numbers
-  ja-hiraku: true
+    ja-space-around-code:
+      before: true
+      after: true
+    ja-space-around-link:
+      before: true
+      after: true
+    ja-space-around-strong:
+      before: true
+      after: true
+    ja-space-around-emphasis:
+      before: true
+      after: true
+  "@textlint-ja/no-synonyms": true
   common-misspellings: true
-  ja-no-orthographic-variants: true
   no-mixed-zenkaku-and-hankaku-alphabet: true
   "@proofdict/proofdict":
     dictURL: "https://atsushifx.github.io/proof-dictionary/"
   prh:
     rulePaths:
       - ./.textlint/dicts/prh.yml
+      - ./.textlint/dicts/prh-my-settings.yml

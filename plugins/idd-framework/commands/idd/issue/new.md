@@ -228,7 +228,7 @@ types=$(/_helpers:_get-issue-types "$title" "$summary")
 
 `_get-issue-types` は以下を実行します:
 
-1. commitlint.config.js から commit種別を動的抽出
+1. commitlint.config.mjs から commit種別を動的抽出
 2. issue種別テーブルを生成
 3. codex-mcp で AI判定を実行
 4. JSON 形式で結果を返す

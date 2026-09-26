@@ -7,15 +7,18 @@
 # https://opensource.org/licenses/MIT
 
 ## AI Generated files
-.claude/**
-.serena/**
+.claude/
+.serena/
+.cocoindex_code/
+.codegraph/
 
-# temp
+## temp
 **/temp/**
 **/tmp/**
 
 ## Dev tools
 .tools/**
 
-## Releases
+## releases
 releases/**
+

@@ -8,7 +8,7 @@
 
 *.js
 *.json
-
+!settings.json
 
 ## .mcp.json.list
 .mcp.*

@@ -368,11 +368,19 @@ generate_commit_message() {
 
   local diff_output
 
+  # `-f` above proves the definition exists, not that it can be read. bash does not
+  # abort a command substitution when a command inside it fails, so the explicit
+  # `exit 1` is what carries the read failure out to the assignment's exit status.
+  # The message stays distinct from the not-found guard so a caller can tell an
+  # absent definition from an unreadable one.
   diff_output=$({
-    cat "${AGENT_TEMPLATE_PATH}"
+    cat "${AGENT_TEMPLATE_PATH}" || exit 1
     echo ""
     make_context_block
-  })
+  }) || {
+    echo "Warning: failed to read the agent template: ${AGENT_TEMPLATE_PATH}" >&2
+    return 1
+  }
 
   # Normalize the prompt to valid UTF-8 (drops stray CP932 bytes that make the AI reject it)
   # Environments without iconv are the only case that passes the prompt through unchanged:

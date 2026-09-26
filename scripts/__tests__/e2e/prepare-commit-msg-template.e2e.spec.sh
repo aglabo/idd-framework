@@ -292,4 +292,104 @@ Describe 'prepare-commit-msg.sh - agent template path'
       End
     End
   End
+
+  Describe 'Given: a sandbox repository whose canonical agent definition exists but cannot be read'
+    CODEX_CALL_LOG=""
+
+    # Runs after the outer BeforeEach, so TEMPLATE_TMPDIR already exists.
+    # The mock runs in a subprocess, so the log path must cross the process boundary.
+    setup_unreadable_call_log() {
+      CODEX_CALL_LOG="${TEMPLATE_TMPDIR}/codex.calls"
+      : > "$CODEX_CALL_LOG"
+      export CODEX_CALL_LOG
+    }
+
+    BeforeEach 'setup_unreadable_call_log'
+
+    # Records the invocation before anything else, so even a template-less prompt
+    # reaching the AI CLI leaves a trace
+    Mock codex
+      echo 'called' >> "$CODEX_CALL_LOG"
+      cat > "$PROMPT_CAPTURE"
+      printf '=== commit header ===\nfix(hook): message from a template-less prompt\n=== commit footer ===\n'
+    End
+
+    codex_call_count() {
+      grep -c '^called$' "$CODEX_CALL_LOG" || true
+    }
+
+    # Sources the script inside the sandbox repository and shadows cat() so that
+    # reading a definition which does exist fails. The shadow has to stay inside
+    # the subprocess: a cat() shadow in the example shell would also intercept
+    # shellspec's own use of cat, and it cannot cross a `bash "$HOOK_SCRIPT"`
+    # boundary, so the sourced form is the only way to reach this path.
+    # `chmod 000` is not an option because MSYS2 ACLs make an unreadable file
+    # unreliable, and pointing the path at a directory is not either: `[[ -f ]]`
+    # would turn false and the existing not-found guard would fire first.
+    # A real subprocess also keeps the script's own `set -euo pipefail` in effect,
+    # which shellspec's `When call` would otherwise suppress.
+    source_generate_with_failing_cat() {
+      (
+        cd "$SANDBOX" && bash -c '
+          source "$1"
+          AI_MODEL="gpt-mock"
+          cat() { return 1; }
+          generate_commit_message
+        ' _ "$HOOK_SCRIPT"
+      )
+    }
+
+    Context 'When: generate_commit_message is called'
+      It 'Then: [異常] - the read failure is reported, the AI CLI is never invoked, and the call returns 1'
+        write_sandbox_template "$CANONICAL_TEMPLATE_RELPATH" 'CANONICAL-TEMPLATE-SENTINEL'
+
+        When call source_generate_with_failing_cat
+
+        The status should equal 1
+        The output should equal ''
+        # Matched as one substring so the message has to name the path it failed on
+        The stderr should match pattern "*failed to read the agent template: *${CANONICAL_TEMPLATE_RELPATH}*"
+        # A swallowed read failure would hand the AI CLI a template-less prompt
+        The value "$(codex_call_count)" should equal 0
+        # The file is present, so the absent-definition guard must not be the one reporting
+        The stderr should not include 'agent template not found'
+      End
+    End
+  End
+
+  Describe 'Given: a sandbox repository holding no agent definition, with the script sourced inside it'
+    # Never called once the guard fires, but it has to exist on PATH: the AI CLI
+    # pre-flight check runs before the template guard and would otherwise fail first
+    Mock codex
+      cat > "$PROMPT_CAPTURE"
+      printf '=== commit header ===\nfix(hook): message from a template-less prompt\n=== commit footer ===\n'
+    End
+
+    # Sources the script inside the sandbox repository and calls
+    # generate_commit_message directly, so which guard reports stays observable
+    # instead of being folded into the main block's hook-mode fail-safe exit 0.
+    # A real subprocess keeps the script's own `set -euo pipefail` in effect.
+    source_generate_in_sandbox() {
+      (
+        cd "$SANDBOX" && bash -c '
+          source "$1"
+          AI_MODEL="gpt-mock"
+          generate_commit_message
+        ' _ "$HOOK_SCRIPT"
+      )
+    }
+
+    Context 'When: generate_commit_message is called'
+      It 'Then: [異常] [characterization] - the absent-definition guard reports and the read-failure path stays silent'
+        When call source_generate_in_sandbox
+
+        The status should equal 1
+        The output should equal ''
+        The stderr should match pattern "*agent template not found: *${CANONICAL_TEMPLATE_RELPATH}*"
+        # The two guards have to stay distinguishable, so that a caller can tell an
+        # absent definition from one it could not read
+        The stderr should not include 'failed to read'
+      End
+    End
+  End
 End

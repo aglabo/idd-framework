@@ -392,4 +392,58 @@ Describe 'prepare-commit-msg.sh - agent template path'
       End
     End
   End
+
+  Describe 'Given: a sandbox repository holding no agent definition, with the hook run in stdout mode'
+    CODEX_CALL_LOG=""
+
+    # Runs after the outer BeforeEach, so TEMPLATE_TMPDIR already exists.
+    # The mock runs in a subprocess, so the log path must cross the process boundary.
+    setup_stdout_mode_call_log() {
+      CODEX_CALL_LOG="${TEMPLATE_TMPDIR}/codex.calls"
+      : > "$CODEX_CALL_LOG"
+      export CODEX_CALL_LOG
+    }
+
+    BeforeEach 'setup_stdout_mode_call_log'
+
+    # Records the invocation before anything else, so even a template-less prompt
+    # reaching the AI CLI leaves a trace. The mock stays load-bearing even though the
+    # expectation is zero calls: the AI CLI pre-flight check runs before the template
+    # guard, so without a codex on PATH the run would fail on the wrong branch and the
+    # example would report exit 1 for the wrong reason.
+    Mock codex
+      echo 'called' >> "$CODEX_CALL_LOG"
+      cat > "$PROMPT_CAPTURE"
+      printf '=== commit header ===\nfix(hook): message from a template-less prompt\n=== commit footer ===\n'
+    End
+
+    codex_call_count() {
+      grep -c '^called$' "$CODEX_CALL_LOG" || true
+    }
+
+    # run_hook_in_sandbox without its --output argument: OUTPUT_FILE then stays empty,
+    # so the main block takes the stdout-mode branch of the generation fail-safe
+    # instead of the hook-mode one every other absent-definition example reaches
+    run_hook_in_sandbox_without_output() {
+      (cd "$SANDBOX" && bash "$HOOK_SCRIPT" --model gpt-mock)
+    }
+
+    Context 'When: the script runs in stdout mode'
+      It 'Then: [異常] [characterization] - exits 1 with an empty stdout, the AI CLI is never invoked, and the hook-mode fail-safe stays out of it'
+        When call run_hook_in_sandbox_without_output
+
+        The status should equal 1
+        # Nothing may reach stdout: a caller piping this into a commit message must not
+        # receive a partial or placeholder body alongside the failure
+        The output should equal ''
+        # Matched as one substring so that the message has to name the path it looked for
+        The stderr should match pattern "*agent template not found: *${CANONICAL_TEMPLATE_RELPATH}*"
+        # A swallowed guard would hand the AI CLI a template-less prompt
+        The value "$(codex_call_count)" should equal 0
+        # Self-defence for the hook-vs-stdout asymmetry: the fail-safe exit 0 branch,
+        # and the warning that announces it, must stay reachable only through --output
+        The stderr should not include 'Keeping the Git default message'
+      End
+    End
+  End
 End

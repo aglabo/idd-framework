@@ -11,7 +11,6 @@
   "type": "module",
   "scripts": {
     "prepare": "bash ./scripts/setup-dev-env.sh",
-    "plugin:build": "bash scripts/build-plugin.sh",
     "scan:secrets": "concurrently \"betterleaks protect --config ./configs/betterleaks.toml\" \"secretlint --secretlintrc ./configs/secretlint.config.yaml .\"",
     "check:sh": "bash runners/run-shfmt.sh --list .",
     "format:sh": "bash runners/run-shfmt.sh --format .",

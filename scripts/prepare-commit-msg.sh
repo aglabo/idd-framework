@@ -50,10 +50,12 @@
 # @exitcode 1 Usage error, or a generation/write failure in stdout mode (no --output)
 #
 # @author atsushifx
-# @version 1.3.1
+# @version 1.4.0
 # @license MIT
 
 # shellcheck disable=SC2034
+
+# cspell:words msgfile SIGPIPE
 
 set -euo pipefail
 
@@ -89,7 +91,7 @@ AI_MODEL="sonnet"
 
 ##
 # @description Path to commit message generator template
-readonly AGENT_TEMPLATE_PATH=".claude/agents/commit-message-generator.md"
+readonly AGENT_TEMPLATE_PATH="${REPO_ROOT}/plugins/idd-framework/agents/commit-message-generator.md"
 
 ##
 # @description Maximum number of recent commits to show in context
@@ -304,7 +306,7 @@ get_model_command() {
 # @description Generate commit message using configured AI model
 #
 # **Execution Contract:**
-# 1. Loads commit-message-generator.md template
+# 1. Loads the agent definition from AGENT_TEMPLATE_PATH
 # 2. Appends git context (logs + diff) as AI input
 # 3. Pipes combined input to AI command
 # 4. Extracts message from either markdown code blocks or header markers
@@ -329,7 +331,7 @@ get_model_command() {
 #
 # @arg $1 string Optional test message (for testing/debugging only)
 # @return 0 If generation and validation succeeds
-# @return 1 If model setup fails, the AI CLI is missing or fails, markers missing, or message empty
+# @return 1 If model setup fails, the AI CLI is missing or fails, the agent template is missing, markers missing, or message empty
 # @stdout Generated Conventional Commits format message
 # @global AI_MODEL Used to determine AI command
 # @global AI_COMMAND Populated by get_model_command()
@@ -357,10 +359,17 @@ generate_commit_message() {
     return 1
   fi
 
+  # Fail before building the prompt: a missing agent definition would otherwise be
+  # swallowed by the command substitution below and yield a template-less prompt
+  if [[ ! -f "${AGENT_TEMPLATE_PATH}" ]]; then
+    echo "Warning: agent template not found: ${AGENT_TEMPLATE_PATH}" >&2
+    return 1
+  fi
+
   local diff_output
 
   diff_output=$({
-    cat .claude/agents/commit-message-generator.md
+    cat "${AGENT_TEMPLATE_PATH}"
     echo ""
     make_context_block
   })

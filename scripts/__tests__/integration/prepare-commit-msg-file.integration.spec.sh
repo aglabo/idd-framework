@@ -109,5 +109,50 @@ Describe 'prepare-commit-msg.sh - File I/O operations'
       End
 
     End
+    Context 'Given: the rename into place fails'
+      OCM_TMPDIR=""
+      OCM_OUTPUT_FILE=""
+
+      setup_rename_failure() {
+        OCM_TMPDIR=$(mktemp -d)
+        OCM_OUTPUT_FILE="${OCM_TMPDIR}/COMMIT_EDITMSG"
+        printf '\n# Please enter the commit message for your changes.\n' > "$OCM_OUTPUT_FILE"
+      }
+
+      cleanup_rename_failure() {
+        rm -rf "$OCM_TMPDIR"
+      }
+
+      BeforeEach 'setup_rename_failure'
+      AfterEach 'cleanup_rename_failure'
+
+      # Runs output_commit_message in a real subprocess so the script keeps its own
+      # `set -euo pipefail` (shellspec's `When call` suppresses it), with mv() shadowed
+      # so the rename of the temp sibling into place always fails
+      run_output_with_failing_mv() {
+        OUT="$OCM_OUTPUT_FILE" bash -c '
+          source scripts/prepare-commit-msg.sh
+          FLAG_OUTPUT_TO_STDOUT=false
+          mv() { return 1; }
+          output_commit_message "feat: replacement message" "$OUT"
+        '
+      }
+
+      # Counts leftovers beside the output file, whatever a temp file happens to be named
+      leftover_file_count() {
+        find "$OCM_TMPDIR" -maxdepth 1 -type f ! -name 'COMMIT_EDITMSG' | wc -l | tr -d ' '
+      }
+
+      Context 'When: output_commit_message writes in file mode'
+        It 'Then: [異常] - reports the failure, keeps the original file, and removes its temp file'
+          When call run_output_with_failing_mv
+
+          The status should equal 1
+          The stderr should include 'failed to move the commit message'
+          The contents of file "$OCM_OUTPUT_FILE" should include 'Please enter the commit message'
+          The value "$(leftover_file_count)" should equal 0
+        End
+      End
+    End
   End
 End

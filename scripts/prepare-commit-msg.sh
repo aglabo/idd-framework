@@ -24,14 +24,16 @@
 #   3. Git Hook Compatibility:
 #      - Conforms to prepare-commit-msg hook interface
 #      - Can be symlinked to .git/hooks/prepare-commit-msg
-#      - Non-zero exit skips hook (safe failure mode)
+#      - A non-zero exit ABORTS the commit, so hook mode (--output FILE) exits 0
+#        when generation or the write fails, leaving Git's default message untouched
 #
 #   Features:
 #   - Conventional Commits format compliance
 #   - Context-aware message generation
 #   - Dual output modes: stdout or file output
 #   - Skips if existing message detected (hook mode)
-#   - Safe failure: markers not found → error exit
+#   - Fail-safe in hook mode: a generation or write failure leaves Git's default message intact
+#   - Fail-first in stdout mode: a generation or write failure exits 1
 #
 # @example
 #   # Output to stdout (interactive)
@@ -43,11 +45,12 @@
 #   # Use specific AI model
 #   prepare-commit-msg.sh --output .git/COMMIT_EDITMSG --model claude-sonnet-4-5
 #
-# @exitcode 0 Success or skipped (existing message found)
-# @exitcode 1 Error during generation (AI output invalid, markers missing, etc.)
+# @exitcode 0 Success, skipped (existing message found), or a generation/write failure
+#             in hook mode (--output FILE): Git's default message is left untouched
+# @exitcode 1 Usage error, or a generation/write failure in stdout mode (no --output)
 #
 # @author atsushifx
-# @version 1.3.0
+# @version 1.3.1
 # @license MIT
 
 # shellcheck disable=SC2034
@@ -136,6 +139,9 @@ EOF
 
 ##
 # @description Parse command-line options and set configuration
+# Positional arguments follow Git's native hook convention
+# (<msgfile> <commit-source> <sha>): only the message file is used as the
+# output file, and an explicit --output takes precedence over it.
 # @arg $@ string Command-line arguments to parse
 # @option --output FILE|-o FILE Write commit message to FILE instead of stdout
 # @option --model MODEL Specify AI model name (default: sonnet)
@@ -148,18 +154,22 @@ EOF
 # @global OUTPUT_FILE
 # @global AI_MODEL
 parse_options() {
+  local positional_index=0
+  local output_option_given=false
+
   while [[ $# -gt 0 ]]; do
     case $1 in
     --output | -o)
-      if [[ -z "${2:-}" ]]; then
+      if [[ $# -lt 2 ]]; then
         echo "Error: --output requires an argument" >&2
         exit 1
       fi
       OUTPUT_FILE="$2"
+      output_option_given=true
       shift 2
       ;;
     --model)
-      if [[ -z "${2:-}" ]]; then
+      if [[ $# -lt 2 ]]; then
         echo "Error: --model requires an argument" >&2
         exit 1
       fi
@@ -173,6 +183,15 @@ parse_options() {
     -*)
       echo "Error: Unknown option: $1" >&2
       exit 1
+      ;;
+    *)
+      # Git native hook argument order: <msgfile> <commit-source> <sha>
+      # Only the message file is used; the remaining arguments are ignored
+      if [[ $positional_index -eq 0 && "$output_option_given" == "false" ]]; then
+        OUTPUT_FILE="$1"
+      fi
+      positional_index=$((positional_index + 1))
+      shift
       ;;
     esac
   done
@@ -310,7 +329,7 @@ get_model_command() {
 #
 # @arg $1 string Optional test message (for testing/debugging only)
 # @return 0 If generation and validation succeeds
-# @return 1 If model setup fails, markers missing, or message empty
+# @return 1 If model setup fails, the AI CLI is missing or fails, markers missing, or message empty
 # @stdout Generated Conventional Commits format message
 # @global AI_MODEL Used to determine AI command
 # @global AI_COMMAND Populated by get_model_command()
@@ -331,6 +350,13 @@ generate_commit_message() {
 
   # Set up AI command for the configured model
   get_model_command "${AI_MODEL}" || return 1
+
+  # Fail before invoking a missing AI CLI: exit 127 would abort the script under set -e
+  if ! command -v "${AI_COMMAND[0]}" >/dev/null 2>&1; then
+    echo "Warning: AI command not found: ${AI_COMMAND[0]}" >&2
+    return 1
+  fi
+
   local diff_output
 
   diff_output=$({
@@ -339,9 +365,38 @@ generate_commit_message() {
     make_context_block
   })
 
-  local full_output
+  # Normalize the prompt to valid UTF-8 (drops stray CP932 bytes that make the AI reject it)
+  # Environments without iconv are the only case that passes the prompt through unchanged:
+  # falling back on the unnormalized text would restore the very bytes this removes
+  if command -v iconv >/dev/null 2>&1; then
+    local normalized_output
+    local iconv_status=0
+    normalized_output=$(printf '%s' "$diff_output" | iconv -c -f UTF-8 -t UTF-8) || iconv_status=$?
 
-  full_output=$(echo "$diff_output" | "${AI_COMMAND[@]}")
+    # `iconv -c` exits 1 whenever it drops a byte, even though the text it produced is
+    # complete and valid, so status 1 is the expected success-with-stripping case.
+    # A higher status means iconv died mid-stream (signal, 128+N): its output is then a
+    # truncated prompt, and a commit message describing a partial diff is worse than none.
+    if [[ $iconv_status -gt 1 ]]; then
+      echo "Warning: prompt normalization failed: iconv exited ${iconv_status}" >&2
+      return 1
+    fi
+
+    diff_output="$normalized_output"
+  fi
+
+  local full_output
+  local ai_status=0
+
+  # Here-string instead of a pipe: an AI CLI that answers without draining a large
+  # prompt would kill the writer with SIGPIPE (141) and fail the pipeline under pipefail
+  # Capture the AI exit status: an unguarded failure would abort the script under set -e
+  full_output=$("${AI_COMMAND[@]}" <<<"$diff_output") || ai_status=$?
+
+  if [[ $ai_status -ne 0 ]]; then
+    echo "Warning: AI command failed: ${AI_COMMAND[0]} (exit ${ai_status})" >&2
+    return 1
+  fi
 
   # Extract the commit message from AI response
   # Skip context output and extract only the message between markers
@@ -387,13 +442,17 @@ generate_commit_message() {
 ##
 # @description Output commit message to stdout or write to file
 # Handles both interactive (stdout) and Git hook (file) output modes
+# In file mode the message lands through a temp sibling and a rename, so a failed
+# write leaves the existing file (Git's default message) untouched
 # @arg $1 string Commit message content
-# @return 0 Always succeeds
+# @arg $2 string Optional output file path (defaults to OUTPUT_FILE)
+# @return 0 If the message was delivered
+# @return 1 If the output file could not be written; the existing file is left untouched
 # @stdout Commit message (if OUTPUT_FILE is empty)
-# @stderr Status message (if outputting to file)
+# @stderr Status message (if outputting to file), or a warning on a failed write
 # @global OUTPUT_FILE Output file path (empty means stdout)
 # @example
-#   output_commit_message "$commit_msg"
+#   output_commit_message "$commit_msg" || exit 1
 output_commit_message() {
   local commit_msg="$1"
   local output_file="${2:-${OUTPUT_FILE}}"
@@ -401,12 +460,27 @@ output_commit_message() {
   if [[ "${FLAG_OUTPUT_TO_STDOUT:-}" == "true" || -z "$output_file" ]]; then
     # Output to stdout (interactive mode)
     echo "$commit_msg"
-  else
-    # Write to file (Git hook mode)
-    rm -f "${output_file}"
-    echo "${commit_msg}" >"${output_file}"
-    echo "✦ Commit message written to ${output_file}" >&2
+    return 0
   fi
+
+  # Write to file (Git hook mode)
+  # Never truncate the destination first: a failed write there would destroy Git's
+  # default message and abort the commit. Fill a temp sibling, then rename it in.
+  local temp_file="${output_file}.tmp.$$"
+
+  if ! echo "${commit_msg}" >"${temp_file}"; then
+    rm -f "${temp_file}"
+    echo "Warning: failed to write the commit message to ${temp_file}" >&2
+    return 1
+  fi
+
+  if ! mv -f "${temp_file}" "${output_file}"; then
+    rm -f "${temp_file}"
+    echo "Warning: failed to move the commit message into ${output_file}" >&2
+    return 1
+  fi
+
+  echo "✦ Commit message written to ${output_file}" >&2
 }
 
 # ============================================================================
@@ -429,8 +503,24 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   fi
 
   # Generate commit message
-  commit_msg=$(generate_commit_message) || exit 1
+  # Hook mode must never abort the commit: report the failure and leave Git's
+  # default message untouched (no write, no placeholder). Stdout mode stays fail-first.
+  if ! commit_msg=$(generate_commit_message); then
+    if [[ -n "$OUTPUT_FILE" ]]; then
+      echo "[WARN] Commit message generation failed. Keeping the Git default message." >&2
+      exit 0
+    fi
+    exit 1
+  fi
 
   # Output commit message
-  output_commit_message "$commit_msg"
+  # Hook mode must never abort the commit either: a failed write leaves the existing
+  # file untouched, so report it and let Git keep its default message.
+  if ! output_commit_message "$commit_msg"; then
+    if [[ -n "$OUTPUT_FILE" ]]; then
+      echo "[WARN] Commit message write failed. Keeping the Git default message." >&2
+      exit 0
+    fi
+    exit 1
+  fi
 fi

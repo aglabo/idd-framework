@@ -32,26 +32,21 @@
 
 Describe 'run-shellcheck.sh - collect_target_files() Unit Tests'
   Include runners/run-shellcheck.sh
+  Include runners/__tests__/spec_helper.sh
 
   # NUL-separated output is converted to lines so it can be asserted line-wise.
   collect_lines() { collect_target_files "$@" | tr '\0' '\n'; }
 
   setup() {
-    FIXTURE_DIR="$(mktemp -d)"
+    new_fixture_dir || return 1
     : >"${FIXTURE_DIR}/a.sh"
     : >"${FIXTURE_DIR}/b.spec.sh"
     mkdir -p "${FIXTURE_DIR}/.tools"
     : >"${FIXTURE_DIR}/.tools/x.sh"
   }
 
-  cleanup() {
-    if [[ -n "${FIXTURE_DIR:-}" ]]; then
-      rm -rf "$FIXTURE_DIR"
-    fi
-  }
-
   BeforeEach 'setup'
-  AfterEach 'cleanup'
+  AfterEach 'remove_fixture_dir'
 
   # ============================================================================
   # Given: a fixture directory holding a.sh, b.spec.sh and .tools/x.sh
